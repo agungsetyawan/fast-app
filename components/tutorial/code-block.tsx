@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Button } from "../ui/button";
 
 const CopyIcon = () => (
   <svg
+    role="img"
+    aria-label="Copy Icon"
     xmlns="http://www.w3.org/2000/svg"
     width="20"
     height="20"
@@ -22,6 +24,8 @@ const CopyIcon = () => (
 
 const CheckIcon = () => (
   <svg
+    role="img"
+    aria-label="Check Icon"
     xmlns="http://www.w3.org/2000/svg"
     width="20"
     height="20"
@@ -40,7 +44,7 @@ export function CodeBlock({ code }: { code: string }) {
   const [icon, setIcon] = useState(CopyIcon);
 
   const copy = async () => {
-    await navigator?.clipboard?.writeText(code);
+    // await navigator?.clipboard?.writeText(code);
     setIcon(CheckIcon);
     setTimeout(() => setIcon(CopyIcon), 2000);
   };

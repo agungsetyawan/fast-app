@@ -1,7 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,23 +13,22 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSignUp = async (formData: FormData) => {
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const repeatPassword = formData.get("repeatPassword") as string;
+
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
@@ -44,7 +44,7 @@ export function SignUpForm({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/protected`,
         },
       });
       if (error) throw error;
@@ -64,41 +64,33 @@ export function SignUpForm({
           <CardDescription>Create a new account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignUp}>
+          <form action={handleSignUp}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
+                  name="email"
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="email@taf.co.id"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <Input name="password" id="password" type="password" required />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="repeat-password">Repeat Password</Label>
                 </div>
                 <Input
+                  name="repeatPassword"
                   id="repeat-password"
                   type="password"
                   required
-                  value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}

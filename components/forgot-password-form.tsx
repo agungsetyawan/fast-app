@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,20 +12,20 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleForgotPassword = async (formData: FormData) => {
+    const email = formData.get("email") as string;
+
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
@@ -33,7 +33,7 @@ export function ForgotPasswordForm({
     try {
       // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/update-password`,
       });
       if (error) throw error;
       setSuccess(true);
@@ -69,17 +69,16 @@ export function ForgotPasswordForm({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleForgotPassword}>
+            <form action={handleForgotPassword}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
+                    name="email"
                     id="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder="email@taf.co.id"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
