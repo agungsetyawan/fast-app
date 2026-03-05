@@ -50,7 +50,6 @@
     "postcss": "^8",
     "serwist": "^9.5.6",
     "tailwindcss": "^4",
-    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5"
   }
 }
