@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Fast App",
   description: "Fast Application",
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {

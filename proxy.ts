@@ -15,9 +15,10 @@ export const config = {
      * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
      * - serwist
      * - sw.js (service worker file)
+     * - manifest.webmanifest
      * - offline (offline page file)
      * Feel free to modify this pattern to include more paths.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)|serwist|sw.js|offline$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)|serwist|sw.js|manifest.webmanifest|offline$).*)",
   ],
 };
