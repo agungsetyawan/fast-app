@@ -34,10 +34,9 @@ export default function RootLayout({
       <body className={`${nunitoSans.className} antialiased`}>
         <SerwistProvider swUrl="/serwist/sw.js">
           <ThemeProvider
-            attribute="class"
+            attribute="data-theme"
             defaultTheme="system"
             enableSystem
-            disableTransitionOnChange
           >
             {children}
           </ThemeProvider>

@@ -1,17 +1,8 @@
 "use client";
 
+import { KeyRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -44,34 +35,36 @@ export function UpdatePasswordForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-          <CardDescription>
-            Please enter your new password below.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <div className="card w-96 bg-base-100 shadow-sm">
+        <div className="card-body">
+          <h2 className="card-title">Reset Your Password</h2>
+          <p>Please enter your new password below.</p>
           <form action={handleForgotPassword}>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 mt-4">
               <div className="grid gap-2">
-                <Label htmlFor="password">New password</Label>
-                <Input
-                  name="password"
-                  id="password"
-                  type="password"
-                  placeholder="New password"
-                  required
-                />
+                <label htmlFor="email">New password</label>
+                <label className="input w-full">
+                  <KeyRound className="h-[1em] opacity-50" size={14} />
+                  <input
+                    name="password"
+                    type="password"
+                    required
+                    placeholder="New password"
+                  />
+                </label>
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <button
+                className="btn btn-primary w-full"
+                type="submit"
+                disabled={isLoading}
+              >
                 {isLoading ? "Saving..." : "Save new password"}
-              </Button>
+              </button>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,18 +1,9 @@
 "use client";
 
+import { KeyRound, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -58,45 +49,56 @@ export function SignUpForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <div className="card w-96 bg-base-100 shadow-sm">
+        <div className="card-body">
+          <h2 className="card-title">Sign up</h2>
+          <p>Create a new account</p>
           <form action={handleSignUp}>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 mt-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  name="email"
-                  id="email"
-                  type="email"
-                  placeholder="email@taf.co.id"
-                  required
-                />
+                <label htmlFor="email">Email</label>
+                <label className="input w-full">
+                  <Mail className="h-[1em] opacity-50" size={14} />
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="email@taf.co.id"
+                  />
+                </label>
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input name="password" id="password" type="password" required />
+                <label htmlFor="password">Password</label>
+                <label className="input w-full">
+                  <KeyRound className="h-[1em] opacity-50" size={14} />
+                  <input
+                    name="password"
+                    type="password"
+                    required
+                    placeholder="••••••"
+                  />
+                </label>
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Repeat Password</Label>
-                </div>
-                <Input
-                  name="repeatPassword"
-                  id="repeat-password"
-                  type="password"
-                  required
-                />
+                <label htmlFor="repeatPassword">Repeat Password</label>
+                <label className="input w-full">
+                  <KeyRound className="h-[1em] opacity-50" size={14} />
+                  <input
+                    name="repeatPassword"
+                    type="password"
+                    required
+                    placeholder="••••••"
+                  />
+                </label>
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <button
+                className="btn btn-primary w-full"
+                type="submit"
+                disabled={isLoading}
+              >
                 {isLoading ? "Creating an account..." : "Sign up"}
-              </Button>
+              </button>
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
@@ -105,8 +107,8 @@ export function SignUpForm({
               </Link>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

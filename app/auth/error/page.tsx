@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 async function ErrorContent({
   searchParams,
@@ -32,18 +31,14 @@ export default function Page({
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">
-                Sorry, something went wrong.
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="card w-96 bg-base-100 shadow-sm">
+            <div className="card-body">
+              <h2 className="card-title">Sorry, something went wrong.</h2>
               <Suspense>
                 <ErrorContent searchParams={searchParams} />
               </Suspense>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
