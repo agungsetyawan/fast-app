@@ -15,6 +15,9 @@ declare const self: ServiceWorkerGlobalScope;
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
+  precacheOptions: {
+    cleanupOutdatedCaches: true,
+  },
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
@@ -26,7 +29,7 @@ const serwist = new Serwist({
     },
     // Gunakan NetworkFirst untuk rute dashboard agar tetap aman
     {
-      matcher: /\/(dashboard|profile|settings)/,
+      matcher: /\/(dashboard|account)/,
       handler: new NetworkFirst({
         cacheName: "authenticated-routes",
         networkTimeoutSeconds: 5,
