@@ -19,7 +19,6 @@ const ThemeSwitcher = () => {
 
   return (
     <label className="swap swap-rotate">
-      {theme}
       <input
         type="checkbox"
         onChange={() => setTheme(theme === "light" ? "dark" : "light")}
