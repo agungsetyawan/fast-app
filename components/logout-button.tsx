@@ -12,7 +12,7 @@ export function LogoutButton() {
     router.push("/auth/login");
   };
   return (
-    <button type="button" className="btn btn-primary" onClick={logout}>
+    <button type="button" className="btn btn-sm btn-primary" onClick={logout}>
       Logout
     </button>
   );
