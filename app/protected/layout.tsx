@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AppIcon } from "@/components/app-icon";
 import { AuthButton } from "@/components/auth-button";
+import { Dock } from "@/components/dock";
 
 export default function ProtectedLayout({
   children,
@@ -26,6 +27,7 @@ export default function ProtectedLayout({
         <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
           {children}
         </div>
+        <Dock />
       </div>
     </main>
   );
