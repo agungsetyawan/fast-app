@@ -19,6 +19,6 @@ export const config = {
      * - offline (offline page file)
      * Feel free to modify this pattern to include more paths.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)|serwist|sw.js|manifest.webmanifest|offline$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)|src/serwist|src/sw.js|src/manifest.webmanifest|src/offline$).*)",
   ],
 };

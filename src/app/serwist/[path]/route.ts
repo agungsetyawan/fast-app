@@ -7,6 +7,6 @@ const _revision =
 
 export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } =
   createSerwistRoute({
-    swSrc: "app/sw.ts",
+    swSrc: "src/app/sw.ts",
     useNativeEsbuild: true,
   });

@@ -25,6 +25,7 @@ export default function EditProfileModal({ ref, initialData }: any) {
         <form action={formAction} className="space-y-4 mt-4">
           <div className="form-control">
             <fieldset className="fieldset">
+              <legend className="fieldset-legend">Name</legend>
               <input
                 name="name"
                 placeholder="Name"
