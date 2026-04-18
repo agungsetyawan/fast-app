@@ -20,22 +20,25 @@ const Dock = () => {
   };
 
   return (
-    <div className="dock dock-sm">
-      {NAV_ITEMS.map(({ id, icon: Icon, href }) => {
-        const isActive = pathname === href;
+    <>
+      <div className="mb-16"></div>
+      <div className="dock dock-sm bg-base-200 shadow-sm">
+        {NAV_ITEMS.map(({ id, icon: Icon, href }) => {
+          const isActive = pathname === href;
 
-        return (
-          <button
-            key={id}
-            type="button"
-            className={isActive ? "dock-active" : ""}
-            onClick={() => handleNavigation(href)}
-          >
-            <Icon size={20} />
-          </button>
-        );
-      })}
-    </div>
+          return (
+            <button
+              key={id}
+              type="button"
+              className={isActive ? "dock-active" : ""}
+              onClick={() => handleNavigation(href)}
+            >
+              <Icon size={20} />
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 };
 

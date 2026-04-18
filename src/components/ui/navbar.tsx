@@ -2,14 +2,31 @@
 
 import { ArrowLeft } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const pageName = pathname.replace(/^\/app\/?|\//g, "") || "home";
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="navbar sticky top-0 z-1 bg-base-100 shadow-sm sm:hidden">
+    <nav
+      className={`navbar sticky top-0 z-1 sm:hidden transition-all duration-300 
+        ${
+          isScrolled ? "backdrop-blur-md shadow-md py-3" : "bg-transparent py-4"
+        }`}
+    >
       <div className="flex-none">
         <button
           type="button"
@@ -19,7 +36,7 @@ export default function Navbar() {
           <ArrowLeft />
         </button>
       </div>
-      <div className="flex-1 ml-4">{pageName.toUpperCase()}</div>
+      <div className="flex-1 ml-4 font-bold text-lg capitalize">{pageName}</div>
     </nav>
   );
 }

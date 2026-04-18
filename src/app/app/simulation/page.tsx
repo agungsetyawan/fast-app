@@ -8,13 +8,19 @@ async function SimulasiBudgetData() {
     .from("simulasi_budget")
     .select();
 
-  return <pre>{JSON.stringify(simulasiBudget, null, 2)}</pre>;
+  return JSON.stringify(simulasiBudget, null, 2);
 }
 
 export default function Page() {
   return (
-    <Suspense fallback={<Loading />}>
-      <SimulasiBudgetData />
-    </Suspense>
+    <div className="flex-1 w-full flex flex-col gap-12 max-md:px-4">
+      <div className="flex flex-col gap-2 items-start">
+        <pre className="text-xs font-mono p-3 rounded overflow-auto w-full">
+          <Suspense fallback={<Loading />}>
+            <SimulasiBudgetData />
+          </Suspense>
+        </pre>
+      </div>
+    </div>
   );
 }

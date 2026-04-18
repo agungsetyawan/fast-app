@@ -80,10 +80,14 @@ async function SimulasiBudgetData() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<Loading />}>
-      <div className="overflow-x-auto h-[calc(100vh-400px)] w-full">
-        <SimulasiBudgetData />
+    <div className="flex-1 w-full flex flex-col gap-12 max-md:px-4">
+      <div className="flex flex-col gap-2 items-start">
+        <Suspense fallback={<Loading />}>
+          <div className="overflow-x-auto h-[calc(100vh-170px)] w-full">
+            <SimulasiBudgetData />
+          </div>
+        </Suspense>
       </div>
-    </Suspense>
+    </div>
   );
 }

@@ -14,13 +14,16 @@ export default function CardProfile({ user }: any) {
   return (
     <div className="card bg-base-100 w-full sm:w-6/12 shadow-sm">
       <figure className="h-32">
-        {/** biome-ignore lint/performance/noImgElement: <> */}
-        <img
-          src="https://images.unsplash.com/photo-1549880338-65ddcdfd017b?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=400&fit=max&ixid=eyJhcHBfaWQiOjE0NTg5fQ"
-          alt="Mountain"
+        <Image
+          width={500}
+          height={128}
+          src="/background.jpg"
+          alt="background"
           className="w-full h-full object-cover"
+          loading="eager"
         />
       </figure>
+
       <div className="mx-auto w-32 h-32 relative -mt-16">
         {!user?.profile_photo_url ? (
           <div className="avatar avatar-placeholder">
@@ -28,7 +31,7 @@ export default function CardProfile({ user }: any) {
               {user?.name ? (
                 <span className="text-5xl">{user?.initialName}</span>
               ) : (
-                <AppIcon width={32} height={32} />
+                <AppIcon width={64} height={64} />
               )}
             </div>
           </div>
@@ -52,7 +55,7 @@ export default function CardProfile({ user }: any) {
           )}
         </div>
       </div>
-      <div className="stats">
+      <div className="stats bg-base-200 mt-2">
         <div className="stat place-items-center">
           <div className="stat-title">Users</div>
           <div className="stat-value text-primary">40</div>
@@ -65,8 +68,8 @@ export default function CardProfile({ user }: any) {
           <div className="stat-desc text-secondary">↘︎ 90 (14%)</div>
         </div>
       </div>
-      <div className="divider"></div>
-      <div className="flex gap-4 justify-center mb-4 px-4">
+      <div className="divider my-0" />
+      <div className="flex gap-4 justify-center p-4 bg-base-300">
         <div className="tooltip" data-tip="Edit Profile">
           <button
             type="button"
