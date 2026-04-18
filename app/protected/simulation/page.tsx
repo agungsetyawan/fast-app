@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Loading from "@/components/ui/loading";
 import { createClient } from "@/lib/supabase/server";
 
 async function SimulasiBudgetData() {
@@ -10,9 +11,9 @@ async function SimulasiBudgetData() {
   return <pre>{JSON.stringify(simulasiBudget, null, 2)}</pre>;
 }
 
-export default function SimulasiBudget() {
+export default function Page() {
   return (
-    <Suspense fallback={<div>Loading simulasi budget...</div>}>
+    <Suspense fallback={<Loading />}>
       <SimulasiBudgetData />
     </Suspense>
   );
