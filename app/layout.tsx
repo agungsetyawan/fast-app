@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito_Sans } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import "./globals.css";
+import { Toaster } from "sonner";
+import AuthProvider from "@/components/auth-provider";
 import { SerwistProvider } from "./serwist";
+import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -43,7 +45,10 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem
           >
-            {children}
+            <AuthProvider>
+              {children}
+              <Toaster position="top-right" richColors />
+            </AuthProvider>
           </ThemeProvider>
         </SerwistProvider>
       </body>
