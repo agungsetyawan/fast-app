@@ -6,7 +6,7 @@ import { useRef } from "react";
 import { AppIcon } from "@/components/app-icon";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import EditProfileModal from "../components/edit-profile-modal";
+import EditProfileModal from "./edit-profile-modal";
 
 export default function CardProfile({ user }: any) {
   const modalRef = useRef<HTMLDialogElement>(null);

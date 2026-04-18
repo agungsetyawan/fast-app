@@ -39,7 +39,7 @@ export function LoginForm({
       });
       if (error) throw error;
 
-      router.push("/protected");
+      router.push("/app");
       return { error: null, email: "" };
     } catch (error: unknown) {
       return {

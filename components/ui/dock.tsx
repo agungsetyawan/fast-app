@@ -4,10 +4,10 @@ import { ChartColumnBig, FileText, Home, Settings } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 const NAV_ITEMS = [
-  { id: "Home", icon: Home, href: "/protected" },
-  { id: "Simulation", icon: ChartColumnBig, href: "/protected/simulation" },
-  { id: "Report", icon: FileText, href: "/protected/report" },
-  { id: "Setting", icon: Settings, href: "/protected/setting" },
+  { id: "Home", icon: Home, href: "/app" },
+  { id: "Simulation", icon: ChartColumnBig, href: "/app/simulation" },
+  { id: "Report", icon: FileText, href: "/app/report" },
+  { id: "Setting", icon: Settings, href: "/app/setting" },
 ] as const;
 
 const Dock = () => {

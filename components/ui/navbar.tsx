@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const pageName = pathname.replace(/^\/protected\/?|\//g, "") || "home";
+  const pageName = pathname.replace(/^\/app\/?|\//g, "") || "home";
 
   return (
     <nav className="navbar sticky top-0 z-1 bg-base-100 shadow-sm sm:hidden">

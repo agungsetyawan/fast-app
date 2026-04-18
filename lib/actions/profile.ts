@@ -55,7 +55,7 @@ export async function updateUser(_prevState: any, formData: FormData) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/protected/setting");
+  revalidatePath("/app/setting");
 
   return { success: true, message: "User updated" };
 }
