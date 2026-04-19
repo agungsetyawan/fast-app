@@ -8,7 +8,20 @@ import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import EditProfileModal from "./edit-profile-modal";
 
-export default function CardProfile({ user }: any) {
+interface User {
+  id?: string;
+  email?: string;
+  name?: string;
+  initialName?: string;
+  avatar_url?: string;
+  branch_name?: string;
+  device_id?: string;
+}
+interface CardProfileProps {
+  user: User;
+}
+
+export default function CardProfile({ user }: CardProfileProps) {
   const modalRef = useRef<HTMLDialogElement>(null);
 
   return (
@@ -25,7 +38,7 @@ export default function CardProfile({ user }: any) {
       </figure>
 
       <div className="mx-auto w-32 h-32 relative -mt-16">
-        {!user?.profile_photo_url ? (
+        {!user?.avatar_url ? (
           <div className="avatar avatar-placeholder">
             <div className="bg-base-300 text-base-content w-32 rounded-full">
               {user?.name ? (
@@ -37,8 +50,13 @@ export default function CardProfile({ user }: any) {
           </div>
         ) : (
           <div className="avatar">
-            <div className="ring-primary ring-offset-base-100 w-32 rounded-full ring-2 ring-offset-2">
-              <Image src={user?.profile_photo_url} alt="Profile" />
+            <div className="bg-base-300 ring-primary ring-offset-base-100 w-32 rounded-full ring-2 ring-offset-2">
+              <Image
+                src={user?.avatar_url}
+                width={128}
+                height={128}
+                alt="Profile"
+              />
             </div>
           </div>
         )}

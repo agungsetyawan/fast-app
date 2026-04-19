@@ -1,8 +1,20 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { UserSchema } from "@/lib/schemas/user";
 import { createClient } from "@/lib/supabase/server";
+import { MIME_TO_EXT, UserSchema } from "@/lib/validations/user";
+
+interface UpdateUserResult {
+  success?: boolean;
+  message: string;
+  errors?: Record<string, string[]>;
+  enteredValues?: { name: string };
+}
+
+interface UpdateUserData {
+  name: string | null;
+  avatar_url?: string;
+}
 
 export async function getUser() {
   const supabase = await createClient();
@@ -28,25 +40,6 @@ export async function getUser() {
   };
 }
 
-const MAX_FILE_SIZE = 1024 * 1024; // 1MB
-// const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
-const MIME_TO_EXT: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-};
-
-interface UpdateUserResult {
-  success?: boolean;
-  message: string;
-  errors?: Record<string, string[]>;
-  enteredValues?: { name: string; avatar?: File | null };
-}
-
-interface UpdateUserData {
-  name: string | null;
-  avatar_url?: string;
-}
 export async function updateUser(
   _prevState: unknown,
   formData: FormData,
@@ -59,61 +52,44 @@ export async function updateUser(
   } = await supabase.auth.getUser();
   if (!user) return { message: "Unauthorized" };
 
-  // 2. Validasi input
-  const rawData = { name: formData.get("name") as string };
-  const validatedFields = UserSchema.safeParse(rawData);
+  // 2. Validasi input via Zod
+  const rawData = {
+    name: String(formData.get("name") ?? ""),
+    avatar: formData.get("avatar") as File | undefined,
+  };
 
+  const validatedFields = UserSchema.safeParse(rawData);
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: "Check your input field",
-      enteredValues: rawData,
+      enteredValues: { name: rawData.name },
     };
   }
 
-  const { name = "" } = validatedFields.data;
-  const updateData: UpdateUserData = { name };
+  const { name = "", avatar } = validatedFields.data;
+  const updateData: UpdateUserData = { name: name || null };
 
   // 3. Handle avatar upload
-  const imageFile = formData.get("avatar") as File | null;
-
-  if (imageFile && imageFile.size > 0) {
-    // Validasi ukuran
-    if (imageFile.size > MAX_FILE_SIZE) {
-      return {
-        errors: { avatar: ["File terlalu besar. Maksimal ukuran adalah 1MB."] },
-        message: "File terlalu besar. Maksimal ukuran adalah 1MB.",
-        enteredValues: rawData,
-      };
-    }
-
-    // Validasi tipe — derive ekstensi dari MIME type, bukan nama file
-    const ext = MIME_TO_EXT[imageFile.type];
-    if (!ext) {
-      return {
-        errors: {
-          avatar: ["Format file tidak didukung. Gunakan JPG, PNG, atau WebP."],
-        },
-        message: "Format file tidak didukung. Gunakan JPG, PNG, atau WebP.",
-        enteredValues: rawData,
-      };
-    }
-
-    // Upload dulu sebelum hapus yang lama (hindari race condition)
+  if (avatar && avatar.size > 0) {
+    // Derive ekstensi dari MIME type (sudah tervalidasi Zod)
+    const ext = MIME_TO_EXT[avatar.type];
     const fileName = `${user.id}-${Date.now()}.${ext}`;
+
+    // Upload baru dulu sebelum hapus lama
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(fileName, imageFile);
+      .upload(fileName, avatar);
 
     if (uploadError) {
       return {
         errors: { avatar: ["Gagal upload gambar ke storage"] },
         message: "Gagal upload gambar ke storage",
-        enteredValues: rawData,
+        enteredValues: { name: rawData.name },
       };
     }
 
-    // Hapus avatar lama SETELAH upload baru berhasil
+    // Hapus avatar lama setelah upload berhasil
     const { data: oldUser } = await supabase
       .from("users")
       .select("avatar_url")
@@ -121,15 +97,9 @@ export async function updateUser(
       .single();
 
     if (oldUser?.avatar_url) {
-      // Extract path relatif dari full public URL
       const url = new URL(oldUser.avatar_url);
-      console.log("pathname:", url.pathname);
-
       const oldPath = url.pathname.split("/avatars/")[1];
-      console.log("oldPath:", oldPath);
-
       if (oldPath) {
-        // Fire-and-forget: jangan block jika gagal hapus
         supabase.storage.from("avatars").remove([oldPath]).catch(console.error);
       }
     }
@@ -149,9 +119,8 @@ export async function updateUser(
 
   if (dbError) {
     return {
-      errors: { avatar: ["Gagal update profil"] },
       message: dbError.message,
-      enteredValues: rawData,
+      enteredValues: { name: rawData.name },
     };
   }
 
