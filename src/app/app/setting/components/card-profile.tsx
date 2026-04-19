@@ -6,23 +6,15 @@ import { useRef } from "react";
 import { AppIcon } from "@/components/app-icon";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import Loading from "@/components/ui/loading";
+import { useUser } from "@/hooks/use-user";
 import EditProfileModal from "./edit-profile-modal";
 
-interface User {
-  id?: string;
-  email?: string;
-  name?: string;
-  initialName?: string;
-  avatar_url?: string;
-  branch_name?: string;
-  device_id?: string;
-}
-interface CardProfileProps {
-  user: User;
-}
-
-export default function CardProfile({ user }: CardProfileProps) {
+export default function CardProfile() {
   const modalRef = useRef<HTMLDialogElement>(null);
+
+  const { data: user, isLoading } = useUser();
+  if (isLoading) return <Loading />;
 
   return (
     <div className="card bg-base-100 w-full sm:w-6/12 shadow-sm">
@@ -96,7 +88,7 @@ export default function CardProfile({ user }: CardProfileProps) {
           >
             <UserPen />
           </button>
-          <EditProfileModal ref={modalRef} initialData={user} />
+          <EditProfileModal ref={modalRef} />
         </div>
         <button type="button" className="btn btn-primary ">
           <CloudSync />

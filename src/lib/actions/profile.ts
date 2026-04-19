@@ -1,118 +1,98 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { MIME_TO_EXT, UserSchema } from "@/lib/validations/user";
+import { MIME_TO_EXT } from "@/lib/validations/user";
 
-interface UpdateUserResult {
-  success?: boolean;
-  message: string;
-  errors?: Record<string, string[]>;
-  enteredValues?: {
-    name: string;
-    avatar?: File;
-  };
-}
-
-interface UpdateUserData {
-  name: string;
-  avatar_url?: string;
-}
-
-export async function updateUser(
-  _prevState: unknown,
-  formData: FormData,
-): Promise<UpdateUserResult> {
-  const supabase = await createClient();
-
-  // 1. Auth check
+// Mutation untuk nama — bisa offline queue
+export async function updateUserName(name: string) {
+  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { message: "Unauthorized" };
+  if (!user) throw new Error("Unauthorized");
 
-  // 2. Validasi input via Zod
-  const nameField = formData.get("name") as string;
-  const avatarFile = formData.get("avatar") as File;
-
-  const rawData = {
-    name: nameField,
-    avatar: avatarFile.size > 0 ? avatarFile : undefined,
-  };
-
-  const validatedFields = UserSchema.safeParse(rawData);
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: "Check your input field",
-      enteredValues: {
-        name: rawData.name,
-        avatar: rawData.avatar,
-      },
-    };
-  }
-
-  const { name, avatar } = validatedFields.data;
-  const updateData = { name } as UpdateUserData;
-
-  // 3. Handle avatar upload
-  if (avatar && avatar.size > 0) {
-    // Derive ekstensi dari MIME type (sudah tervalidasi Zod)
-    const ext = MIME_TO_EXT[avatar.type];
-    const fileName = `${user.id}-${Date.now()}.${ext}`;
-
-    // Upload baru dulu sebelum hapus lama
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(fileName, avatar);
-
-    if (uploadError) {
-      return {
-        errors: { avatar: ["Gagal upload gambar ke storage"] },
-        message: "Gagal upload gambar ke storage",
-        enteredValues: {
-          name: rawData.name,
-          avatar: rawData?.avatar,
-        },
-      };
-    }
-
-    // Hapus avatar lama setelah upload berhasil
-    const { data: oldUser } = await supabase
-      .from("users")
-      .select("avatar_url")
-      .eq("id", user.id)
-      .single();
-
-    if (oldUser?.avatar_url) {
-      const url = new URL(oldUser.avatar_url);
-      const oldPath = url.pathname.split("/avatars/")[1];
-      if (oldPath) {
-        supabase.storage.from("avatars").remove([oldPath]).catch(console.error);
-      }
-    }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("avatars").getPublicUrl(fileName);
-
-    updateData.avatar_url = publicUrl;
-  }
-
-  // 4. Update database
-  const { error: dbError } = await supabase
+  const { error } = await supabase
     .from("users")
-    .update(updateData)
+    .update({ name })
     .eq("id", user.id);
 
-  if (dbError) {
-    return {
-      message: dbError.message,
-      enteredValues: {
-        name: rawData.name,
-        avatar: rawData?.avatar,
-      },
-    };
+  if (error) throw new Error(error.message);
+  return { success: true };
+}
+
+// Mutation untuk avatar — butuh koneksi, tidak di-queue
+export async function updateUserAvatar(avatar: File) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const ext = MIME_TO_EXT[avatar.type];
+  if (!ext) throw new Error("Format tidak didukung");
+
+  const fileName = `${user.id}-${Date.now()}.${ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from("avatars")
+    .upload(fileName, avatar);
+
+  if (uploadError) throw new Error("Gagal upload gambar");
+
+  // Hapus avatar lama
+  const { data: oldUser } = await supabase
+    .from("users")
+    .select("avatar_url")
+    .eq("id", user.id)
+    .single();
+
+  if (oldUser?.avatar_url) {
+    const url = new URL(oldUser.avatar_url);
+    const oldPath = url.pathname.split("/avatars/")[1];
+    if (oldPath) {
+      supabase.storage.from("avatars").remove([oldPath]).catch(console.error);
+    }
   }
 
-  return { success: true, message: "Profil berhasil diperbarui" };
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("avatars").getPublicUrl(fileName);
+
+  const { error: dbError } = await supabase
+    .from("users")
+    .update({ avatar_url: publicUrl })
+    .eq("id", user.id);
+
+  if (dbError) throw new Error(dbError.message);
+  return { success: true };
+}
+
+interface User {
+  id: string;
+  email: string;
+  name?: string;
+  role: string;
+  device_id?: string;
+  branch_id?: string;
+  branch_name?: string;
+  avatar_url?: string;
+  initialName?: string;
+}
+
+// Fetch user — untuk useQuery
+export async function getUser() {
+  const supabase = createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const { data: user, error } = await supabase
+    .from("users_view")
+    .select()
+    .eq("id", claimsData?.claims?.sub)
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  const getInitials = (str: string) => str.match(/\b(\w)/g)?.join("");
+  return {
+    ...user,
+    initialName: getInitials(user.name || ""),
+  } as User;
 }

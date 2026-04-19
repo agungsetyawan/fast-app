@@ -1,44 +1,69 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
-import { updateUser } from "@/lib/actions/profile";
+import { useRef, useState } from "react";
+import {
+  useUpdateUserAvatar,
+  useUpdateUserName,
+  useUser,
+} from "@/hooks/use-user";
 import { UserSchema } from "@/lib/validations/user";
-
-interface InitialData {
-  name?: string;
-  avatar_url?: string;
-}
 
 interface EditProfileModalProps {
   ref: React.RefObject<HTMLDialogElement | null>;
-  initialData: InitialData;
 }
 
-export default function EditProfileModal({
-  ref,
-  initialData,
-}: EditProfileModalProps) {
-  const [state, formAction, isPending] = useActionState(updateUser, null);
+export default function EditProfileModal({ ref }: EditProfileModalProps) {
+  const { data: user } = useUser();
+
+  const { mutate: updateName, isPending: isNamePending } = useUpdateUserName();
+  const { mutate: updateAvatar, isPending: isAvatarPending } =
+    useUpdateUserAvatar();
+
   const [nameError, setNameError] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const router = useRouter();
 
-  useEffect(() => {
-    if (state?.success) {
-      toast.success(state.message);
-      formRef.current?.reset();
+  const isPending = isNamePending || isAvatarPending;
+
+  const handleSubmit = (formData: FormData) => {
+    const name = (formData.get("name") as string).trim();
+    const avatar = formData.get("avatar") as File;
+
+    const hasNameChange = name && name !== user?.name;
+    const hasAvatarChange = avatar && avatar.size > 0;
+
+    if (!hasNameChange && !hasAvatarChange) {
       ref.current?.close();
-      router.refresh();
+      return;
     }
-    if (state?.errors) {
-      toast.error(state.message);
-    }
-  }, [state, ref.current, router.refresh]);
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (hasAvatarChange && !navigator.onLine) {
+      setAvatarError("Upload avatar membutuhkan koneksi internet.");
+      return;
+    }
+
+    if (hasNameChange) {
+      updateName(name, {
+        onSuccess: () => {
+          if (!hasAvatarChange) {
+            formRef.current?.reset();
+            ref.current?.close();
+          }
+        },
+      });
+    }
+
+    if (hasAvatarChange) {
+      updateAvatar(avatar, {
+        onSuccess: () => {
+          formRef.current?.reset();
+          ref.current?.close();
+        },
+      });
+    }
+  };
+
+  const handleNameBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const result = UserSchema.pick({ name: true }).safeParse({
       name: e.target.value,
     });
@@ -65,29 +90,23 @@ export default function EditProfileModal({
     setAvatarError(null);
   };
 
-  // Gabungkan error dari server dan client, prioritaskan client error
-  const nameErrorMessage = nameError ?? state?.errors?.name?.[0] ?? null;
-  const avatarErrorMessage = avatarError ?? state?.errors?.avatar?.[0] ?? null;
-
   return (
     <dialog ref={ref} className="modal modal-bottom sm:modal-middle">
       <div className="modal-box">
         <h3 className="font-bold text-lg">Edit Profile</h3>
 
-        <form ref={formRef} action={formAction} className="space-y-4 mt-4">
+        <form ref={formRef} action={handleSubmit} className="space-y-4 mt-4">
           <div className="form-control">
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Name</legend>
               <input
                 name="name"
                 placeholder="Name"
-                defaultValue={state?.enteredValues?.name ?? initialData?.name}
-                className={`input input-bordered w-full ${nameErrorMessage ? "input-error" : ""}`}
-                onBlur={handleNameChange}
+                defaultValue={user?.name ?? ""}
+                className={`input input-bordered w-full ${nameError ? "input-error" : ""}`}
+                onBlur={handleNameBlur}
               />
-              {nameErrorMessage && (
-                <p className="label text-error">{nameErrorMessage}</p>
-              )}
+              {nameError && <p className="label text-error">{nameError}</p>}
             </fieldset>
 
             <fieldset className="fieldset">
@@ -96,15 +115,11 @@ export default function EditProfileModal({
                 name="avatar"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                className={`file-input input-bordered w-full ${
-                  avatarErrorMessage ? "file-input-error" : ""
-                }`}
+                className={`file-input input-bordered w-full ${avatarError ? "file-input-error" : ""}`}
                 onChange={handleFileChange}
               />
               <div className="label">Max size 1MB</div>
-              {avatarErrorMessage && (
-                <p className="label text-error">{avatarErrorMessage}</p>
-              )}
+              {avatarError && <p className="label text-error">{avatarError}</p>}
             </fieldset>
           </div>
 

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "start:https": "next start & local-ssl-proxy --source 3001 --target 3000 --cert certificates/localhost.pem --key certificates/localhost-key.pem",
+    "start:https": "next build && next start & local-ssl-proxy --source 3001 --target 3000 --cert certificates/localhost.pem --key certificates/localhost-key.pem",
     "lint": "biome check",
     "format": "biome format --write",
     "prepare": "husky"
@@ -19,7 +19,11 @@
   "dependencies": {
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
+    "@tanstack/query-async-storage-persister": "^5.99.2",
+    "@tanstack/react-query": "^5.99.2",
+    "@tanstack/react-query-persist-client": "^5.99.2",
     "clsx": "^2.1.1",
+    "idb": "^8.0.3",
     "lucide-react": "^1.8.0",
     "next": "16.1.6",
     "next-themes": "^0.4.6",
@@ -27,8 +31,7 @@
     "react-dom": "19.2.3",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
-    "zod": "^4.3.6",
-    "zustand": "^5.0.12"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.5",

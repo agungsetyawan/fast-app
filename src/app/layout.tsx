@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Nunito_Sans } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
-import AuthProvider from "@/components/auth-provider";
+import { Providers } from "./providers";
 import { SerwistProvider } from "./serwist";
 import "./globals.css";
 
@@ -46,10 +46,10 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem
           >
-            <AuthProvider>
+            <Providers>
               {children}
               <Toaster position="top-right" richColors />
-            </AuthProvider>
+            </Providers>
           </ThemeProvider>
         </SerwistProvider>
       </body>

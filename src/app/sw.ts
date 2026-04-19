@@ -29,7 +29,7 @@ const serwist = new Serwist({
     },
     // Gunakan NetworkFirst untuk rute dashboard agar tetap aman
     {
-      matcher: /\/(dashboard|account)/,
+      matcher: /\/(app)/,
       handler: new NetworkFirst({
         cacheName: "authenticated-routes",
         networkTimeoutSeconds: 5,
