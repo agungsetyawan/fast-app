@@ -88,7 +88,7 @@ export default function CardProfile({ user }: CardProfileProps) {
       </div>
       <div className="divider my-0" />
       <div className="flex gap-4 justify-center p-4 bg-base-300">
-        <div className="tooltip" data-tip="Edit Profile">
+        <div className="[@media(hover:hover)]:tooltip" data-tip="Edit Profile">
           <button
             type="button"
             className="btn btn-outline btn-primary"

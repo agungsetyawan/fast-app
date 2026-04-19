@@ -1,43 +1,21 @@
-"use server";
+"use client";
 
-import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { MIME_TO_EXT, UserSchema } from "@/lib/validations/user";
 
 interface UpdateUserResult {
   success?: boolean;
   message: string;
   errors?: Record<string, string[]>;
-  enteredValues?: { name: string };
+  enteredValues?: {
+    name: string;
+    avatar?: File;
+  };
 }
 
 interface UpdateUserData {
-  name: string | null;
+  name: string;
   avatar_url?: string;
-}
-
-export async function getUser() {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const { data: user, error } = await supabase
-    .from("users_view")
-    .select()
-    .eq("id", claimsData?.claims?.sub)
-    .single();
-
-  if (error) return { error: error.message };
-
-  const getInitials = (str: string) => str.match(/\b(\w)/g)?.join("");
-
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    initialName: getInitials(user.name || ""),
-    avatar_url: user.avatar_url,
-    branch_name: user.branch_name,
-    device_id: user.device_id,
-  };
 }
 
 export async function updateUser(
@@ -53,9 +31,12 @@ export async function updateUser(
   if (!user) return { message: "Unauthorized" };
 
   // 2. Validasi input via Zod
+  const nameField = formData.get("name") as string;
+  const avatarFile = formData.get("avatar") as File;
+
   const rawData = {
-    name: String(formData.get("name") ?? ""),
-    avatar: formData.get("avatar") as File | undefined,
+    name: nameField,
+    avatar: avatarFile.size > 0 ? avatarFile : undefined,
   };
 
   const validatedFields = UserSchema.safeParse(rawData);
@@ -63,12 +44,15 @@ export async function updateUser(
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: "Check your input field",
-      enteredValues: { name: rawData.name },
+      enteredValues: {
+        name: rawData.name,
+        avatar: rawData.avatar,
+      },
     };
   }
 
-  const { name = "", avatar } = validatedFields.data;
-  const updateData: UpdateUserData = { name: name || null };
+  const { name, avatar } = validatedFields.data;
+  const updateData = { name } as UpdateUserData;
 
   // 3. Handle avatar upload
   if (avatar && avatar.size > 0) {
@@ -85,7 +69,10 @@ export async function updateUser(
       return {
         errors: { avatar: ["Gagal upload gambar ke storage"] },
         message: "Gagal upload gambar ke storage",
-        enteredValues: { name: rawData.name },
+        enteredValues: {
+          name: rawData.name,
+          avatar: rawData?.avatar,
+        },
       };
     }
 
@@ -120,10 +107,12 @@ export async function updateUser(
   if (dbError) {
     return {
       message: dbError.message,
-      enteredValues: { name: rawData.name },
+      enteredValues: {
+        name: rawData.name,
+        avatar: rawData?.avatar,
+      },
     };
   }
 
-  revalidatePath("/app/setting");
   return { success: true, message: "Profil berhasil diperbarui" };
 }

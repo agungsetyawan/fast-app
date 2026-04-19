@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { updateUser } from "@/lib/actions/profile";
@@ -23,17 +24,19 @@ export default function EditProfileModal({
   const [nameError, setNameError] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (state?.success) {
       toast.success(state.message);
       formRef.current?.reset();
       ref.current?.close();
+      router.refresh();
     }
     if (state?.errors) {
       toast.error(state.message);
     }
-  }, [state, ref]);
+  }, [state, ref.current, router.refresh]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const result = UserSchema.pick({ name: true }).safeParse({
@@ -98,9 +101,7 @@ export default function EditProfileModal({
                 }`}
                 onChange={handleFileChange}
               />
-              <label className="label" htmlFor="avatar">
-                Max size 1MB
-              </label>
+              <div className="label">Max size 1MB</div>
               {avatarErrorMessage && (
                 <p className="label text-error">{avatarErrorMessage}</p>
               )}
