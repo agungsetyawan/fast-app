@@ -22,7 +22,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`navbar sticky top-0 z-1 sm:hidden transition-all duration-300 
+      className={`navbar sticky top-0 z-100 sm:hidden transition-all duration-300 
         ${
           isScrolled ? "backdrop-blur-md shadow-md py-3" : "bg-transparent py-4"
         }`}
