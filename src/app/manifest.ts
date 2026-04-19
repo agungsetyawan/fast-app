@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Fast App",
     short_name: "FastApp",
     description: "Fast Application",
-    start_url: "/",
+    start_url: "/app",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#0089ca",
