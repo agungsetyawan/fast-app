@@ -17,11 +17,7 @@ export async function deleteDraft(formId: string): Promise<void> {
 }
 
 export async function getAllDrafts<T>(): Promise<
-  {
-    id: string;
-    data: T;
-    savedAt: number;
-  }[]
+  { id: string; data: T; savedAt: number }[]
 > {
   const db = await getDB();
   const all = await db.getAll("form-drafts");

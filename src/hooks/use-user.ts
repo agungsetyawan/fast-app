@@ -15,9 +15,11 @@ export function useUser() {
 
 export function useUpdateUserName() {
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationKey: ["updateUser"], // key ini yang di-persist untuk offline queue
+    mutationKey: ["updateUser"],
     mutationFn: updateUserName,
+    networkMode: "always",
     onMutate: async (name) => {
       // Optimistic update — UI langsung update tanpa tunggu server
       await queryClient.cancelQueries({ queryKey: ["user"] });
@@ -27,12 +29,15 @@ export function useUpdateUserName() {
       return { prev };
     },
     onError: (err, _, context) => {
-      // Rollback kalau gagal
       queryClient.setQueryData(["user"], context?.prev);
       toast.error(err.message);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+    onSuccess: async (data) => {
+      if (data.queued) {
+        toast.info("Tersimpan, akan disinkronkan saat online");
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.success("Nama berhasil diperbarui");
     },
   });
@@ -40,12 +45,12 @@ export function useUpdateUserName() {
 
 export function useUpdateUserAvatar() {
   const queryClient = useQueryClient();
+
   return useMutation({
-    // Tidak pakai mutationKey — tidak di-queue saat offline
     mutationFn: updateUserAvatar,
     onError: (err) => toast.error(err.message),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.success("Avatar berhasil diperbarui");
     },
   });

@@ -27,9 +27,22 @@ const serwist = new Serwist({
       matcher: /.*\/auth\/v1\/.*/,
       handler: new NetworkOnly(),
     },
-    // Gunakan NetworkFirst untuk rute dashboard agar tetap aman
+
+    // Mutation (POST, PATCH, DELETE) tidak boleh di-cache
     {
-      matcher: /\/(app)/,
+      matcher: /.*\/rest\/v1\/.*/,
+      handler: new NetworkOnly(),
+    },
+
+    // Supabase Storage juga NetworkOnly
+    {
+      matcher: /.*\/storage\/v1\/.*/,
+      handler: new NetworkOnly(),
+    },
+
+    // Gunakan NetworkFirst untuk rute app agar tetap aman
+    {
+      matcher: ({ url }) => url.pathname.startsWith("/app"),
       handler: new NetworkFirst({
         cacheName: "authenticated-routes",
         networkTimeoutSeconds: 5,

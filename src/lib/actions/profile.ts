@@ -1,48 +1,110 @@
 "use client";
 
+import { deleteDraft, getDraft, saveDraft } from "@/lib/db/form-drafts";
 import { createClient } from "@/lib/supabase/client";
 import { MIME_TO_EXT } from "@/lib/validations/user";
 
-// Mutation untuk nama — bisa offline queue
-export async function updateUserName(name: string) {
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  role: string;
+  device_id?: string;
+  branch_id?: string;
+  branch_name?: string;
+  avatar_url?: string;
+  initialName?: string;
+}
+
+export async function getUser(): Promise<User> {
   const supabase = createClient();
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const { data: user, error } = await supabase
+    .from("users_view")
+    .select()
+    .eq("id", session.user?.id)
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  const getInitials = (str: string) => str.match(/\b(\w)/g)?.join("");
+  return {
+    ...user,
+    initialName: getInitials(user.name || ""),
+  } as User;
+}
+
+export async function updateUserName(
+  name: string,
+): Promise<{ success: boolean; queued?: boolean }> {
+  if (!navigator.onLine) {
+    await saveDraft("pending-name-update", { name });
+    return { success: true, queued: true };
+  }
+
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
 
   const { error } = await supabase
     .from("users")
     .update({ name })
-    .eq("id", user.id);
+    .eq("id", session.user.id);
 
   if (error) throw new Error(error.message);
-  return { success: true };
+  return { success: true, queued: false };
 }
 
-// Mutation untuk avatar — butuh koneksi, tidak di-queue
-export async function updateUserAvatar(avatar: File) {
+export async function syncPendingNameUpdate(): Promise<boolean> {
+  const draft = await getDraft<{ name: string }>("pending-name-update");
+  if (!draft) return false;
+
   const supabase = createClient();
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const { error } = await supabase
+    .from("users")
+    .update({ name: draft.name })
+    .eq("id", session.user.id);
+
+  if (error) throw new Error(error.message);
+
+  await deleteDraft("pending-name-update");
+  return true;
+}
+
+export async function updateUserAvatar(
+  avatar: File,
+): Promise<{ success: boolean }> {
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
 
   const ext = MIME_TO_EXT[avatar.type];
   if (!ext) throw new Error("Format tidak didukung");
 
-  const fileName = `${user.id}-${Date.now()}.${ext}`;
+  const fileName = `${session.user?.id}-${Date.now()}.${ext}`;
   const { error: uploadError } = await supabase.storage
     .from("avatars")
     .upload(fileName, avatar);
 
   if (uploadError) throw new Error("Gagal upload gambar");
 
-  // Hapus avatar lama
   const { data: oldUser } = await supabase
     .from("users")
     .select("avatar_url")
-    .eq("id", user.id)
+    .eq("id", session.user?.id)
     .single();
 
   if (oldUser?.avatar_url) {
@@ -60,39 +122,8 @@ export async function updateUserAvatar(avatar: File) {
   const { error: dbError } = await supabase
     .from("users")
     .update({ avatar_url: publicUrl })
-    .eq("id", user.id);
+    .eq("id", session.user?.id);
 
   if (dbError) throw new Error(dbError.message);
   return { success: true };
-}
-
-interface User {
-  id: string;
-  email: string;
-  name?: string;
-  role: string;
-  device_id?: string;
-  branch_id?: string;
-  branch_name?: string;
-  avatar_url?: string;
-  initialName?: string;
-}
-
-// Fetch user — untuk useQuery
-export async function getUser() {
-  const supabase = createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const { data: user, error } = await supabase
-    .from("users_view")
-    .select()
-    .eq("id", claimsData?.claims?.sub)
-    .single();
-
-  if (error) throw new Error(error.message);
-
-  const getInitials = (str: string) => str.match(/\b(\w)/g)?.join("");
-  return {
-    ...user,
-    initialName: getInitials(user.name || ""),
-  } as User;
 }

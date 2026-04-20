@@ -14,7 +14,6 @@ interface EditProfileModalProps {
 
 export default function EditProfileModal({ ref }: EditProfileModalProps) {
   const { data: user } = useUser();
-
   const { mutate: updateName, isPending: isNamePending } = useUpdateUserName();
   const { mutate: updateAvatar, isPending: isAvatarPending } =
     useUpdateUserAvatar();
@@ -51,6 +50,9 @@ export default function EditProfileModal({ ref }: EditProfileModalProps) {
           }
         },
       });
+
+      formRef.current?.reset();
+      ref.current?.close();
     }
 
     if (hasAvatarChange) {
