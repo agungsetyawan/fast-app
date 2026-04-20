@@ -1,14 +1,29 @@
 "use client";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useEffect, useState } from "react";
 
 export default function ConnectionBanner() {
-  const isOnline = useOnlineStatus();
+  const [isOnline, setIsOnline] = useState<boolean | null>(null);
 
-  if (isOnline) return null;
+  useEffect(() => {
+    setIsOnline(navigator.onLine);
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  if (isOnline !== false) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-red-600 text-white p-2 text-center text-sm z-50">
-      ⚠️ Koneksi terputus. Beberapa fitur mungkin tidak berfungsi.
+    <div className="fixed bottom-15 left-0 right-0 bg-warning text-warning-content p-2 text-center text-sm z-100">
+      You are offline.
     </div>
   );
 }

@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { id: "Setting", icon: Settings, href: "/app/setting" },
 ] as const;
 
-const Dock = () => {
+export default function Dock() {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -40,6 +40,4 @@ const Dock = () => {
       </div>
     </>
   );
-};
-
-export { Dock };
+}

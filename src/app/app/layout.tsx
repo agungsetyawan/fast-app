@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AppIcon } from "@/components/app-icon";
 import { AuthButton } from "@/components/auth-button";
-import { Dock } from "@/components/ui/dock";
+import ConnectionBanner from "@/components/connection-banner";
+import Dock from "@/components/ui/dock";
 import Navbar from "@/components/ui/navbar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -25,6 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex flex-col gap-20 max-w-5xl lg:p-5 w-full items-center">
           {children}
         </div>
+        <ConnectionBanner />
         <Dock />
       </div>
     </main>
