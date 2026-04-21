@@ -18,13 +18,13 @@ export default function BarChart() {
       series: [
         {
           name: "Simulasi Budget",
-          color: "#007A55",
+          color: "#00d390",
           data: [1420, 1620, 0, 1420, 1650, 2120],
         },
         {
           name: "Simulasi Credit",
           data: [788, 810, 0, 788, 1100, 1200],
-          color: "#C70036",
+          color: "#9f191e",
         },
       ],
       chart: {

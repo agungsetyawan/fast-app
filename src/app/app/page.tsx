@@ -1,4 +1,4 @@
-import { MoveUp } from "lucide-react";
+import { Banknote, Calculator, MoveUp } from "lucide-react";
 import { Suspense } from "react";
 import Loading from "@/components/ui/loading";
 import BarChart from "./component/simbar";
@@ -9,13 +9,13 @@ export default function AppPage() {
       <div className="flex flex-col gap-2 items-start">
         <div className="p-3 w-full">
           <Suspense fallback={<Loading />}>
-            <div className="flex justify-between border-base-content border-b pb-3">
-              <dl>
-                <dt className="text-base-content">Total Simulasi</dt>
-                <dd className="text-2xl font-semibold text-base-content">
-                  2000
-                </dd>
-              </dl>
+            <div className="flex justify-between items-center">
+              <div className="stats">
+                <div className="stat">
+                  <div className="stat-title">Total Simulasi</div>
+                  <div className="stat-value">5,400</div>
+                </div>
+              </div>
               <div>
                 <div className="badge badge-soft badge-success text-base-content">
                   <MoveUp size={14} />
@@ -23,19 +23,22 @@ export default function AppPage() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 py-3">
-              <dl>
-                <dt className="text-base-content">Simulasi Budget</dt>
-                <dd className="text-lg font-semibold text-base-content">
-                  1000
-                </dd>
-              </dl>
-              <dl>
-                <dt className="text-base-content">Simulasi Credit</dt>
-                <dd className="text-lg font-semibold text-base-content">
-                  1000
-                </dd>
-              </dl>
+            <div className="stats shadow">
+              <div className="stat">
+                <div className="stat-figure text-success">
+                  <Banknote />
+                </div>
+                <div className="stat-title">Simulasi Budget</div>
+                <div className="stat-value">4,200</div>
+              </div>
+
+              <div className="stat">
+                <div className="stat-figure text-secondary">
+                  <Calculator />
+                </div>
+                <div className="stat-title">Simulasi Credit</div>
+                <div className="stat-value">1,200</div>
+              </div>
             </div>
             <BarChart />
           </Suspense>
