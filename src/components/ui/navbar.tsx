@@ -38,7 +38,7 @@ export default function Navbar() {
         </button>
       </div>
       <div className="flex-1 ml-4 font-bold text-lg capitalize">{pageName}</div>
-      <ConnectionBanner />
+      <ConnectionBanner className="animate-pulse" />
     </nav>
   );
 }
