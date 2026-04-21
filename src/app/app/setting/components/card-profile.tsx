@@ -1,11 +1,12 @@
 "use client";
 
-import { CloudSync, LogOut, UserPen } from "lucide-react";
+import { LogOut, RefreshCcw, UserPen } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { AppIcon } from "@/components/app-icon";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { useSync } from "@/hooks/use-sync";
 import { useUser } from "@/hooks/use-user";
 import EditProfileModal from "./edit-profile-modal";
 
@@ -19,6 +20,7 @@ export default function CardProfile() {
   }, []);
 
   const { data: user, isLoading } = useUser();
+  const { sync, isSyncing } = useSync();
 
   if (!mounted || isLoading) {
     return (
@@ -117,9 +119,14 @@ export default function CardProfile() {
           </button>
           <EditProfileModal ref={modalRef} />
         </div>
-        <button type="button" className="btn btn-primary ">
-          <CloudSync />
-          Sync
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={sync}
+          disabled={isSyncing}
+        >
+          <RefreshCcw className={isSyncing ? "animate-spin" : ""} />
+          {isSyncing ? "Syncing..." : "Sync"}
         </button>
         <div className="flex flex-1 gap-4 justify-end">
           <ThemeSwitcher />
