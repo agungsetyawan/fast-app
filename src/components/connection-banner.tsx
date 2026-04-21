@@ -2,7 +2,7 @@
 import { useOnlineStatus } from "@/hooks/use-online-status";
 
 export default function ConnectionBanner() {
-  const isOnline = useOnlineStatus();
+  const { isOnline } = useOnlineStatus();
   if (isOnline !== false) return null;
 
   return (

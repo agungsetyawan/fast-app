@@ -33,7 +33,7 @@ export function Toaster(...props: Parameters<typeof ToasterComponent>) {
         ["--error-bg" as CssVariable]: "var(--color-error)",
         ["--error-text" as CssVariable]: "var(--color-error-content)",
       }}
-      swipeDirections={["left", "right"]}
+      swipeDirections={["left", "right", "top"]}
       {...props}
     />
   );

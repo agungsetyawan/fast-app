@@ -1,11 +1,12 @@
 "use client";
 
-import { LogOut, RefreshCcw, UserPen } from "lucide-react";
+import { LogOut, RefreshCw, RefreshCwOff, UserPen } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { AppIcon } from "@/components/app-icon";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useSync } from "@/hooks/use-sync";
 import { useUser } from "@/hooks/use-user";
 import EditProfileModal from "./edit-profile-modal";
@@ -13,6 +14,7 @@ import EditProfileModal from "./edit-profile-modal";
 export default function CardProfile() {
   const modalRef = useRef<HTMLDialogElement>(null);
   const [mounted, setMounted] = useState(false);
+  const { isOnline } = useOnlineStatus();
 
   // useEffect only runs on the client, so now we can safely show the UI
   useEffect(() => {
@@ -123,15 +125,20 @@ export default function CardProfile() {
           type="button"
           className="btn btn-primary"
           onClick={sync}
-          disabled={isSyncing}
+          disabled={!isOnline || isSyncing}
         >
-          <RefreshCcw className={isSyncing ? "animate-spin" : ""} />
-          {isSyncing ? "Syncing..." : "Sync"}
+          {!isOnline ? (
+            <RefreshCwOff />
+          ) : (
+            <RefreshCw className={isSyncing ? "animate-spin" : ""} />
+          )}
+          Sync
         </button>
         <div className="flex flex-1 gap-4 justify-end">
           <ThemeSwitcher />
           <LogoutButton className="btn-soft btn-error">
-            <LogOut /> Logout
+            <LogOut />
+            Logout
           </LogoutButton>
         </div>
       </div>
