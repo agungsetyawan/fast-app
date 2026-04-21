@@ -1,15 +1,20 @@
 "use client";
 
-import ApexCharts from "apexcharts";
+import ApexCharts, { type ApexOptions } from "apexcharts";
+import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 
 export default function BarChart() {
   const chartRef = useRef<HTMLDivElement | null>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!chartRef.current) return;
 
-    const options = {
+    const options: ApexOptions = {
+      theme: {
+        mode: theme as "light" | "dark" | undefined,
+      },
       series: [
         {
           name: "Simulasi Budget",
@@ -53,9 +58,6 @@ export default function BarChart() {
       tooltip: {
         shared: true,
         intersect: false,
-        formatter: (value: number) => {
-          return value;
-        },
       },
       xaxis: {
         categories: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
@@ -96,7 +98,7 @@ export default function BarChart() {
     return () => {
       chart.destroy();
     };
-  }, []);
+  }, [theme]);
 
   return <div ref={chartRef} className="w-full" />;
 }
