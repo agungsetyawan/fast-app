@@ -34,6 +34,7 @@ export default function Dock() {
               onClick={() => handleNavigation(href)}
             >
               <Icon size={20} />
+              <span className="dock-label max-sm:hidden">{id}</span>
             </button>
           );
         })}
