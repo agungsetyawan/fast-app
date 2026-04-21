@@ -14,8 +14,6 @@ export function Toaster(...props: Parameters<typeof ToasterComponent>) {
       position="top-right"
       richColors
       visibleToasts={4}
-      offset={{ top: "64px", bottom: "56px", right: "16px", left: "16px" }}
-      mobileOffset={{ top: "72px", bottom: "56px" }}
       icons={{
         success: <CircleCheck size={18} />,
         info: <Info size={18} />,
