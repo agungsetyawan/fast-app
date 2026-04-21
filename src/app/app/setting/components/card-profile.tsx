@@ -117,7 +117,7 @@ export default function CardProfile() {
             className="btn btn-outline btn-primary"
             onClick={() => modalRef.current?.showModal()}
           >
-            <UserPen />
+            <UserPen size={16} />
           </button>
           <EditProfileModal ref={modalRef} />
         </div>
@@ -128,16 +128,16 @@ export default function CardProfile() {
           disabled={!isOnline || isSyncing}
         >
           {!isOnline ? (
-            <RefreshCwOff />
+            <RefreshCwOff size={16} />
           ) : (
-            <RefreshCw className={isSyncing ? "animate-spin" : ""} />
+            <RefreshCw size={16} className={isSyncing ? "animate-spin" : ""} />
           )}
           Sync
         </button>
         <div className="flex flex-1 gap-4 justify-end">
-          <ThemeSwitcher />
+          <ThemeSwitcher mode="button" />
           <LogoutButton className="btn-soft btn-error">
-            <LogOut />
+            <LogOut size={16} />
             Logout
           </LogoutButton>
         </div>
