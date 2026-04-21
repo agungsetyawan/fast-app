@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${nunitoSans.className} antialiased`}>
-        <SerwistProvider swUrl="/serwist/sw.js">
+        <SerwistProvider swUrl="/serwist/sw.js" reloadOnOnline={false}>
           <ThemeProvider
             attribute="data-theme"
             defaultTheme="system"
