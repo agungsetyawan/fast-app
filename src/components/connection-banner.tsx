@@ -1,13 +1,20 @@
 "use client";
-import { useOnlineStatus } from "@/hooks/use-online-status";
 
-export default function ConnectionBanner() {
+import { WifiOff } from "lucide-react";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { cn } from "@/lib/utils";
+
+export default function ConnectionBanner({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) {
   const { isOnline } = useOnlineStatus();
   if (isOnline !== false) return null;
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 bg-warning text-warning-content p-2 text-center text-sm z-100">
-      You are offline
+    <div className={cn("badge badge-warning badge-lg", className)} {...props}>
+      <WifiOff size={20} />
+      <span className="text-sm max-sm:hidden">Your connection is offline</span>
     </div>
   );
 }
