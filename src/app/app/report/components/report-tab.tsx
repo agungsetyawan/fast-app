@@ -1,6 +1,12 @@
 "use client";
 
-import { Banknote, Calculator, Eye } from "lucide-react";
+import {
+  Banknote,
+  Calculator,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 type DataType = {
@@ -113,9 +119,12 @@ export default function ReportTab({
       className="cursor-pointer select-none"
     >
       {label}{" "}
-      {sortKey === colKey && (
-        <span className="text-primary">{sortAsc ? "↑" : "↓"}</span>
-      )}
+      {sortKey === colKey &&
+        (sortAsc ? (
+          <ChevronUp size={16} className="inline-block" />
+        ) : (
+          <ChevronDown size={16} className="inline-block" />
+        ))}
     </td>
   );
 
@@ -148,14 +157,14 @@ export default function ReportTab({
 
       {/* Table — daisyUI table with border wrapper */}
       <div className="overflow-auto h-[calc(100vh-340px)] md:h-[calc(100vh-400px)] w-full rounded-box border border-base-content/5 bg-base-100">
-        <table className="table table-pin-rows table-pin-cols table-zebra">
+        <table className="table table-pin-rows table-pin-cols">
           <thead>
             <tr>
               <SortableHeader label="Label" colKey="customer_name" />
               <SortableHeader label="Paket Name" colKey="paket_name" />
               <SortableHeader label="Area" colKey="area" />
               <SortableHeader label="Branch" colKey="branch" />
-              <th className=" bg-base-100 z-20 text-center">Action</th>
+              <th className="text-center">Action</th>
             </tr>
           </thead>
 
@@ -173,13 +182,11 @@ export default function ReportTab({
                   <td>{item.paket_name}</td>
                   <td>{item.area}</td>
                   <td>{item.branch}</td>
-                  <th className="bg-base-100 z-20 text-center">
+                  <th className="bg-base-100 text-center">
                     <button
                       type="button"
-                      title="Preview"
-                      aria-label="Preview"
                       onClick={() => handlePreview(item)}
-                      className="btn btn-ghost btn-xs"
+                      className="btn btn-ghost btn-xs btn-square"
                     >
                       <Eye size={16} />
                     </button>
