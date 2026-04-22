@@ -4,6 +4,7 @@ import imageCompression from "browser-image-compression";
 import { deleteDraft, getDraft, saveDraft } from "@/lib/db/form-drafts";
 import { createClient } from "@/lib/supabase/client";
 import { MIME_TO_EXT } from "@/lib/validations/user";
+import { getAuthenticatedSession } from "./auth";
 
 // --- Types ---
 export interface User {
@@ -27,19 +28,11 @@ const getInitials = (name: string) =>
     .toUpperCase()
     .slice(0, 2) || "";
 
-async function getAuthenticatedSession() {
-  const supabase = createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.user) throw new Error("Unauthorized");
-  return { supabase, user: session.user };
-}
-
 // --- Main Functions ---
 
 export async function getUser(): Promise<User> {
-  const { supabase, user: authUser } = await getAuthenticatedSession();
+  const supabase = createClient();
+  const { user: authUser } = await getAuthenticatedSession();
 
   const { data: user, error } = await supabase
     .from("users_view")
@@ -64,7 +57,8 @@ export async function updateUserName(
     return { success: true, queued: true };
   }
 
-  const { supabase, user } = await getAuthenticatedSession();
+  const supabase = createClient();
+  const { user } = await getAuthenticatedSession();
 
   const { error } = await supabase
     .from("users")
@@ -92,8 +86,6 @@ export async function syncPendingNameUpdate(): Promise<boolean> {
 export async function updateUserAvatar(
   avatar: File,
 ): Promise<{ success: boolean }> {
-  const { supabase, user } = await getAuthenticatedSession();
-
   const options = {
     maxSizeMB: 1,
     maxWidthOrHeight: 1024,
@@ -111,6 +103,9 @@ export async function updateUserAvatar(
   if (!ext) {
     throw new Error("Format tidak didukung. Gunakan JPG, PNG, atau WebP.");
   }
+
+  const supabase = createClient();
+  const { user } = await getAuthenticatedSession();
 
   const fileName = `${user.id}/avatar-${Date.now()}.${ext}`;
   const bucket = supabase.storage.from("avatars");

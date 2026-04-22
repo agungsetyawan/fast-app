@@ -1,5 +1,8 @@
 import { toast } from "sonner";
-import { syncPendingNameUpdate, updateUserName } from "@/lib/actions/profile";
+import {
+  syncPendingNameUpdate,
+  updateUserName,
+} from "@/lib/actions/client/profile";
 import { queryClient } from "@/lib/query/client";
 
 export function registerMutationDefaults() {

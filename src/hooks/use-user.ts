@@ -4,7 +4,7 @@ import {
   getUser,
   updateUserAvatar,
   updateUserName,
-} from "@/lib/actions/profile";
+} from "@/lib/actions/client/profile";
 
 export function useUser() {
   return useQuery({
