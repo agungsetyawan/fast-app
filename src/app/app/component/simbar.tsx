@@ -1,30 +1,35 @@
 "use client";
 
-import ApexCharts, { type ApexOptions } from "apexcharts";
-import { useTheme } from "next-themes";
+import ApexCharts from "apexcharts";
 import { useEffect, useRef } from "react";
 
-export default function BarChart() {
+type Props = {
+  budgetData: number[];
+  creditData: number[];
+  categories: string[];
+};
+
+export default function BarChart({
+  budgetData,
+  creditData,
+  categories,
+}: Props) {
   const chartRef = useRef<HTMLDivElement | null>(null);
-  const { theme } = useTheme();
 
   useEffect(() => {
     if (!chartRef.current) return;
 
-    const options: ApexOptions = {
-      theme: {
-        mode: theme as "light" | "dark" | undefined,
-      },
+    const options = {
       series: [
         {
           name: "Simulasi Budget",
-          color: "#00d390",
-          data: [1420, 1620, 0, 1420, 1650, 2120],
+          color: "#007A55",
+          data: budgetData,
         },
         {
           name: "Simulasi Credit",
-          data: [788, 810, 0, 788, 1100, 1200],
-          color: "#9f191e",
+          data: creditData,
+          color: "#C70036",
         },
       ],
       chart: {
@@ -58,9 +63,12 @@ export default function BarChart() {
       tooltip: {
         shared: true,
         intersect: false,
+        formatter: (value: number) => {
+          return value;
+        },
       },
       xaxis: {
-        categories: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        categories: categories,
         axisTicks: { show: false },
         axisBorder: { show: false },
         labels: {
@@ -98,7 +106,7 @@ export default function BarChart() {
     return () => {
       chart.destroy();
     };
-  }, [theme]);
+  }, []);
 
   return <div ref={chartRef} className="w-full" />;
 }
