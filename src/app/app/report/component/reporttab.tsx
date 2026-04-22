@@ -117,7 +117,7 @@ export default function ReportTab({
     `}
                 >
                     <Banknote size={18} className="opacity-90" />
-                    Budget
+                    Simulasi Budget
                 </button>
 
                 {/* Credit */}
@@ -133,7 +133,7 @@ export default function ReportTab({
     `}
                 >
                     <Calculator size={18} className="opacity-90" />
-                    Credit
+                    Simulasi Credit
                 </button>
 
             </div>
