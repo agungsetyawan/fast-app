@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { clearAllCache } from "@/lib/query/mutation-defaults";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -10,16 +10,21 @@ type LogoutButtonProps = {
 };
 
 export function LogoutButton({ className, children }: LogoutButtonProps) {
-  const router = useRouter();
+  const handleLogout = async () => {
+    await clearAllCache();
 
-  const logout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/auth/login");
+
+    window.location.href = "/auth/login";
   };
 
   return (
-    <button type="button" className={cn("btn", className)} onClick={logout}>
+    <button
+      type="button"
+      className={cn("btn", className)}
+      onClick={handleLogout}
+    >
       {children ? children : "Logout"}
     </button>
   );

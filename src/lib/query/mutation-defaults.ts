@@ -3,6 +3,7 @@ import {
   syncPendingNameUpdate,
   updateUserName,
 } from "@/lib/actions/client/profile";
+import { getDB } from "@/lib/db/idb";
 import { queryClient } from "@/lib/query/client";
 
 export function registerMutationDefaults() {
@@ -39,4 +40,11 @@ export async function syncPendingMutations() {
 
   // Nanti kalau ada pending mutations lain, tambah di sini
   // await syncPendingProductUpdate();
+}
+
+export async function clearAllCache() {
+  queryClient.clear();
+  const db = await getDB();
+  await db.clear("query-cache");
+  await db.clear("form-drafts");
 }
