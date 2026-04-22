@@ -12,7 +12,35 @@ async function UserDetails() {
     redirect("/auth/login");
   }
 
-  return JSON.stringify(data.claims, null, 2);
+  // return JSON.stringify(data.claims, null, 2);
+  return data.claims;
+}
+
+const claims = await UserDetails();
+const CreatedBy = claims?.email;
+
+async function SimulasiBudgetViewData() {
+  const supabase = await createClient();
+  const { data: simulasiBudgetView } = await supabase
+    .from("apps_dashboard_metrics_simulation_budget_user")
+    .select()
+    .eq("sales", CreatedBy)
+    .eq("year", "2026");
+
+  // return JSON.stringify(simulasiBudgetView, null, 2);
+  return simulasiBudgetView;
+}
+
+async function SimulasiCreditViewData() {
+  const supabase = await createClient();
+  const { data: simulasiCreditView } = await supabase
+    .from("apps_dashboard_metrics_simulation_credit_user")
+    .select()
+    .eq("sales", CreatedBy)
+    .eq("year", "2026");
+
+  // `return JSON.stringify(simulasiCreditView, null, 2);`
+  return simulasiCreditView;
 }
 
 export default function AppPage() {
