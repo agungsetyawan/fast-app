@@ -141,7 +141,7 @@ export default function ReportTab({
             role="tab"
             type="button"
             onClick={() => setActiveTab(key)}
-            className={`tab gap-2 ${activeTab === key ? "tab-active" : ""}`}
+            className={`tab gap-2 max-sm:w-1/2 font-semibold ${activeTab === key ? "tab-active" : ""}`}
           >
             {icon}
             {label}
