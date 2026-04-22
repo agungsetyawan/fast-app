@@ -16,10 +16,10 @@ export const UserSchema = z.object({
     .or(z.literal("")),
   avatar: z
     .instanceof(File)
-    .refine(
-      (file) => file.size <= MAX_FILE_SIZE,
-      "File terlalu besar. Maksimal 1MB.",
-    )
+    // .refine(
+    //   (file) => file.size <= MAX_FILE_SIZE,
+    //   "File terlalu besar. Maksimal 1MB.",
+    // )
     .refine(
       (file) => ALLOWED_TYPES.includes(file.type),
       "Format tidak didukung. Gunakan JPG, PNG, atau WebP.",

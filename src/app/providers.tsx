@@ -38,9 +38,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       client={queryClient}
       persistOptions={{
         persister,
-        maxAge: 1000 * 60 * 60 * 24,
+        // Maksimal umur cache yang di-restore dari IndexedDB
+        // Cache lebih lama dari ini akan dibuang saat app restart
+        maxAge: 1000 * 60 * 60 * 24, // 24 jam
       }}
       onSuccess={async () => {
+        // Cache berhasil di-restore dari IndexedDB
+        // Resume semua mutation yang pending saat offline
         if (navigator.onLine) {
           console.log("restored from cache, syncing...");
           await syncPendingMutations();

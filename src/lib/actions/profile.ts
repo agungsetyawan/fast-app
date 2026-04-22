@@ -108,9 +108,11 @@ export async function updateUserAvatar(
   }
 
   const ext = MIME_TO_EXT[fileToUpload.type];
-  if (!ext) throw new Error("Format file tidak didukung (Gunakan JPG/PNG)");
+  if (!ext) {
+    throw new Error("Format tidak didukung. Gunakan JPG, PNG, atau WebP.");
+  }
 
-  const fileName = `${user.id}/avatar-${Date.now()}.${ext}`; // Gunakan folder per user agar lebih rapi
+  const fileName = `${user.id}/avatar-${Date.now()}.${ext}`;
   const bucket = supabase.storage.from("avatars");
 
   // 1. Upload file baru

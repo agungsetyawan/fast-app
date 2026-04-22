@@ -3,6 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import ConnectionBanner from "../connection-banner";
 
 export default function Navbar() {
   const router = useRouter();
@@ -37,6 +38,7 @@ export default function Navbar() {
         </button>
       </div>
       <div className="flex-1 ml-4 font-bold text-lg capitalize">{pageName}</div>
+      <ConnectionBanner className="animate-pulse" />
     </nav>
   );
 }

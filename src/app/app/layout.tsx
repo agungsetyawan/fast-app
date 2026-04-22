@@ -26,7 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex flex-col gap-20 max-w-5xl lg:p-5 w-full items-center">
           {children}
         </div>
-        <ConnectionBanner />
+        <ConnectionBanner className="md:fixed md:bottom-16 max-sm:hidden" />
         <Dock />
       </div>
     </main>

@@ -1,20 +1,52 @@
 "use client";
 
-import { CloudSync, LogOut, UserPen } from "lucide-react";
+import { LogOut, RefreshCw, RefreshCwOff, UserPen } from "lucide-react";
 import Image from "next/image";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppIcon } from "@/components/app-icon";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import Loading from "@/components/ui/loading";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { useSync } from "@/hooks/use-sync";
 import { useUser } from "@/hooks/use-user";
 import EditProfileModal from "./edit-profile-modal";
 
 export default function CardProfile() {
   const modalRef = useRef<HTMLDialogElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const { isOnline } = useOnlineStatus();
+
+  // useEffect only runs on the client, so now we can safely show the UI
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { data: user, isLoading } = useUser();
-  if (isLoading) return <Loading />;
+  const { sync, isSyncing } = useSync();
+
+  if (!mounted || isLoading) {
+    return (
+      <div className="card bg-base-100 w-full sm:w-6/12 shadow-sm">
+        <div className="skeleton h-32 w-full" />
+        <div className="mx-auto w-32 h-32 relative -mt-16">
+          <div className="skeleton w-32 h-32 rounded-full" />
+        </div>
+        <div className="flex flex-col items-center mt-2 gap-1">
+          <div className="skeleton h-6 w-30" />
+          <div className="skeleton h-6 w-40" />
+          <div className="flex gap-4 justify-center items-center">
+            <div className="skeleton h-6 w-20" />
+            <div className="skeleton h-6 w-30" />
+          </div>
+        </div>
+        <div className="mt-2">
+          <div className="skeleton h-29 w-full" />
+        </div>
+        <div className="divider my-0" />
+        <div className="skeleton h-18 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="card bg-base-100 w-full sm:w-6/12 shadow-sm">
@@ -28,7 +60,6 @@ export default function CardProfile() {
           loading="eager"
         />
       </figure>
-
       <div className="mx-auto w-32 h-32 relative -mt-16">
         {!user?.avatar_url ? (
           <div className="avatar avatar-placeholder">
@@ -47,7 +78,7 @@ export default function CardProfile() {
                 src={user?.avatar_url}
                 width={128}
                 height={128}
-                alt="Profile"
+                alt="avatar"
               />
             </div>
           </div>
@@ -86,18 +117,28 @@ export default function CardProfile() {
             className="btn btn-outline btn-primary"
             onClick={() => modalRef.current?.showModal()}
           >
-            <UserPen />
+            <UserPen size={16} />
           </button>
           <EditProfileModal ref={modalRef} />
         </div>
-        <button type="button" className="btn btn-primary ">
-          <CloudSync />
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={sync}
+          disabled={!isOnline || isSyncing}
+        >
+          {!isOnline ? (
+            <RefreshCwOff size={16} />
+          ) : (
+            <RefreshCw size={16} className={isSyncing ? "animate-spin" : ""} />
+          )}
           Sync
         </button>
         <div className="flex flex-1 gap-4 justify-end">
-          <ThemeSwitcher />
+          <ThemeSwitcher mode="button" />
           <LogoutButton className="btn-soft btn-error">
-            <LogOut /> Logout
+            <LogOut size={16} />
+            Logout
           </LogoutButton>
         </div>
       </div>
