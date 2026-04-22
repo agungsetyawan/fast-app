@@ -131,7 +131,10 @@ export default function ReportTab({
   return (
     <div className="flex flex-col gap-4">
       {/* Tabs — daisyUI tabs-box */}
-      <div role="tablist" className="tabs tabs-box w-fit justify-center">
+      <div
+        role="tablist"
+        className="tabs tabs-box w-full md:w-fit justify-around"
+      >
         {TABS.map(({ key, label, icon }) => (
           <button
             key={key}
