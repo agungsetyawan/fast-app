@@ -42,7 +42,7 @@ export default async function Page() {
   const credit = await SimulasiCreditData(createdBy);
 
   return (
-    <div className="w-full flex flex-col gap-2 p-2">
+    <div className="w-full flex flex-col gap-2 px-4">
       <Suspense fallback={<Loading />}>
         <ReportTab simulasiBudget={budget} simulasiCredit={credit} />
       </Suspense>

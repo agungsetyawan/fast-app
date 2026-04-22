@@ -97,7 +97,7 @@ export default async function AppPage() {
   const averageRate = simulasiViewData?.[0]?.total_contribution_percent ?? 0;
 
   return (
-    <div className="w-full flex flex-col gap-2 p-2">
+    <div className="w-full flex flex-col gap-2 px-4">
       <Suspense fallback={<Loading />}>
         <div className="flex justify-between items-center">
           <div className="stats">
