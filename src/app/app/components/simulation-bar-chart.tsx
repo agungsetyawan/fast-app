@@ -1,6 +1,7 @@
 "use client";
 
-import ApexCharts from "apexcharts";
+import ApexCharts, { type ApexOptions } from "apexcharts";
+import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 
 type Props = {
@@ -9,27 +10,31 @@ type Props = {
   categories: string[];
 };
 
-export default function BarChart({
+export default function SimulationBarChart({
   budgetData,
   creditData,
   categories,
 }: Props) {
   const chartRef = useRef<HTMLDivElement | null>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!chartRef.current) return;
 
-    const options = {
+    const options: ApexOptions = {
+      theme: {
+        mode: theme as "light" | "dark" | undefined,
+      },
       series: [
         {
           name: "Simulasi Budget",
-          color: "#007A55",
+          color: "var(--color-success)",
           data: budgetData,
         },
         {
           name: "Simulasi Credit",
+          color: "var(--color-secondary)",
           data: creditData,
-          color: "#C70036",
         },
       ],
       chart: {
@@ -38,7 +43,8 @@ export default function BarChart({
         },
         type: "bar",
         width: "100%",
-        height: 400,
+        height: 600,
+        background: "var(--color-base-200)",
         toolbar: {
           show: false,
         },
@@ -48,6 +54,7 @@ export default function BarChart({
           horizontal: true,
           columnWidth: "100%",
           borderRadius: 6,
+          borderRadiusApplication: "around",
           dataLabels: {
             position: "top",
           },
@@ -56,6 +63,7 @@ export default function BarChart({
       legend: {
         show: true,
         position: "bottom",
+        fontFamily: "Nunito Sans, Nunito Sans Fallback",
       },
       dataLabels: {
         enabled: false,
@@ -63,9 +71,6 @@ export default function BarChart({
       tooltip: {
         shared: true,
         intersect: false,
-        formatter: (value: number) => {
-          return value;
-        },
       },
       xaxis: {
         categories: categories,
@@ -74,18 +79,18 @@ export default function BarChart({
         labels: {
           show: true,
           style: {
-            fontFamily: "Inter, sans-serif",
-            cssClass: "text-xs font-normal fill-body",
+            fontFamily: "Nunito Sans, Nunito Sans Fallback",
+            cssClass: "text-xs font-normal",
           },
-          formatter: (value: string) => value,
         },
       },
       yaxis: {
         labels: {
           show: true,
+          align: "left",
           style: {
-            fontFamily: "Inter, sans-serif",
-            cssClass: "text-xs font-normal fill-body",
+            fontFamily: "Nunito Sans, Nunito Sans Fallback",
+            cssClass: "text-xs font-normal text-left",
           },
         },
       },
@@ -106,7 +111,7 @@ export default function BarChart({
     return () => {
       chart.destroy();
     };
-  }, []);
+  }, [theme, budgetData, creditData, categories]);
 
   return <div ref={chartRef} className="w-full" />;
 }
