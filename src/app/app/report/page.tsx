@@ -1,81 +1,51 @@
-import { CircleX } from "lucide-react";
 import { Suspense } from "react";
 import Loading from "@/components/ui/loading";
 import { createClient } from "@/lib/supabase/server";
-import ReportTab from "./component/reporttab";
-import { redirect } from "next/navigation";
+import ReportTab from "./components/report-tab";
 
-async function UserDetails() {
+async function getClaims() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
-
-  if (error || !data?.claims) {
-    redirect("/auth/login");
-  }
-
-  // return JSON.stringify(data.claims, null, 2);
+  if (error || !data?.claims) throw new Error("Unauthorized");
   return data.claims;
 }
 
-async function SimulasiCreditData(createdBy: string | undefined,
-  year: string = "2026",) {
+async function SimulasiCreditData(createdBy: string | undefined) {
   const supabase = await createClient();
   const { data: simulasiCredit, error } = await supabase
     .from("simulasi_kredit")
     .select()
-    .eq("created_by", createdBy)
+    .eq("created_by", createdBy);
 
-  if (error) {
-    return (
-      <div role="alert" className="alert alert-error w-full">
-        <CircleX />
-        <span>{error?.message || "Error!"}</span>
-      </div>
-    );
-  }
+  if (error) throw new Error("Error");
 
   return simulasiCredit;
 }
 
-async function SimulasiBudgetData(createdBy: string | undefined,
-  year: string = "2026",) {
+async function SimulasiBudgetData(createdBy: string | undefined) {
   const supabase = await createClient();
   const { data: simulasiBudget, error } = await supabase
     .from("simulasi_budget")
     .select()
-    .eq("created_by", createdBy)
+    .eq("created_by", createdBy);
 
-  if (error) {
-    return (
-      <div role="alert" className="alert alert-error w-full">
-        <CircleX />
-        <span>{error?.message || "Error!"}</span>
-      </div>
-    );
-  }
+  if (error) throw new Error("Error");
 
   return simulasiBudget;
 }
 
 export default async function Page() {
-
-  const claims = await UserDetails();
+  const claims = await getClaims();
   const createdBy = claims?.email;
-  const year = new Date().getFullYear().toString();
 
-  const budget = await SimulasiBudgetData(createdBy, year);
-  const credit = await SimulasiCreditData(createdBy, year);
+  const budget = await SimulasiBudgetData(createdBy);
+  const credit = await SimulasiCreditData(createdBy);
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-12 max-md:px-4">
-      <div className="overflow-x-auto h-[calc(100vh-170px)] w-full">
-        <Suspense fallback={<Loading />}>
-          <ReportTab
-            simulasiBudget={budget}
-            simulasiCredit={credit}
-          />
-        </Suspense>
-      </div>
+    <div className="w-full flex flex-col gap-2 p-2">
+      <Suspense fallback={<Loading />}>
+        <ReportTab simulasiBudget={budget} simulasiCredit={credit} />
+      </Suspense>
     </div>
   );
 }

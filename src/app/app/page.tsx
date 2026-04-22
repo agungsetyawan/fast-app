@@ -29,14 +29,11 @@ function mapToMonthlyData(data: any[] | null) {
   });
 }
 
-async function getUserSession() {
+async function getClaims() {
   const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.user) throw new Error("Unauthorized");
-
-  return { user: session.user };
+  const { data, error } = await supabase.auth.getClaims();
+  if (error || !data?.claims) throw new Error("Unauthorized");
+  return data.claims;
 }
 
 async function SimulasiUserViewData(
@@ -82,8 +79,8 @@ async function SimulasiCreditViewData(
 }
 
 export default async function AppPage() {
-  const { user } = await getUserSession();
-  const createdBy = user?.email;
+  const claims = await getClaims();
+  const createdBy = claims?.email;
 
   const [simulasiBudgetView, simulasiCreditView, simulasiViewData] =
     await Promise.all([
