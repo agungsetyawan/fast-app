@@ -95,6 +95,9 @@ export function ForgotPasswordForm({
                   type="submit"
                   disabled={isLoading}
                 >
+                  {isLoading && (
+                    <span className="loading loading-spinner"></span>
+                  )}
                   {isLoading ? "Sending..." : "Send reset email"}
                 </button>
               </div>

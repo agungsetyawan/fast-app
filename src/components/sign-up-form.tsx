@@ -116,6 +116,7 @@ export function SignUpForm({
                 type="submit"
                 disabled={isLoading}
               >
+                {isLoading && <span className="loading loading-spinner"></span>}
                 {isLoading ? "Creating an account..." : "Sign up"}
               </button>
             </div>
