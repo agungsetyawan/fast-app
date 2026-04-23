@@ -73,6 +73,7 @@ export function UpdatePasswordForm({
                 type="submit"
                 disabled={isLoading}
               >
+                {isLoading && <span className="loading loading-spinner"></span>}
                 {isLoading ? "Saving..." : "Save new password"}
               </button>
             </div>

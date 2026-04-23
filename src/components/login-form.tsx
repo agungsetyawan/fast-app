@@ -104,6 +104,7 @@ export function LoginForm({
                 type="submit"
                 disabled={isLoading}
               >
+                {isLoading && <span className="loading loading-spinner"></span>}
                 {isLoading ? "Logging in..." : "Login"}
               </button>
             </div>
