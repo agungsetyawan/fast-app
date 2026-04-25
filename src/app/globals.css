@@ -74,3 +74,24 @@
   --depth: 1;
   --noise: 0;
 }
+
+@media (display-mode: standalone) {
+  * {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}

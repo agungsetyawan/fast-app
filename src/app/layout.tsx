@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   title: "Fast App",
   description: "Fast Application",
   manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
