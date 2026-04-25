@@ -159,7 +159,7 @@ export default function ReportTab({
       />
 
       {/* Table — daisyUI table with border wrapper */}
-      <div className="overflow-auto h-[calc(100vh-340px)] md:h-[calc(100vh-400px)] w-full rounded-box border border-base-content/5 bg-base-100">
+      <div className="overflow-auto h-[calc(100vh-385px)] md:h-[calc(100vh-400px)] w-full rounded-box border border-base-content/5 bg-base-100">
         <table className="table table-pin-rows table-pin-cols">
           <thead>
             <tr>
