@@ -4,8 +4,8 @@ export default function Page() {
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
-        <div className="flex justify-center">
-          <AppLogo width={200} height={100} />
+        <div className="flex justify-center mb-6">
+          <AppLogo width={250} height="auto" />
         </div>
         <div className="flex flex-col gap-6">
           <div className="card w-full md:w-96 bg-base-100 shadow-sm">

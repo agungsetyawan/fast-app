@@ -118,8 +118,6 @@ export default function ReportTab({
       doc.text(`: ${row.value}`, 60, y);
     });
 
-    const y = 40;
-
     // ===== Footer =====
     doc.setFontSize(9);
     doc.setTextColor(150);
