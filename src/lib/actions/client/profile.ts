@@ -3,21 +3,9 @@
 import imageCompression from "browser-image-compression";
 import { deleteDraft, getDraft, saveDraft } from "@/lib/db/form-drafts";
 import { createClient } from "@/lib/supabase/client";
+import { type User, UserSchema } from "@/lib/types/user";
 import { MIME_TO_EXT } from "@/lib/validations/user";
 import { getAuthenticatedSession } from "./auth";
-
-// --- Types ---
-export interface User {
-  id: string;
-  email: string;
-  name?: string;
-  role: string;
-  device_id?: string;
-  branch_id?: string;
-  branch_name?: string;
-  avatar_url?: string;
-  initialName?: string;
-}
 
 // --- Helpers ---
 const getInitials = (name: string) =>
@@ -35,17 +23,18 @@ export async function getUser(): Promise<User> {
   const { user: authUser } = await getAuthenticatedSession();
 
   const { data: user, error } = await supabase
-    .from("users_view")
-    .select()
+    .from("users")
+    .select("*, branch(name)")
     .eq("id", authUser.id)
     .single();
 
   if (error) throw new Error(`Fetch user failed: ${error.message}`);
 
-  return {
+  return UserSchema.parse({
     ...user,
+    branch_name: user.branch?.name || "",
     initialName: getInitials(user.name || ""),
-  };
+  });
 }
 
 export async function updateUserName(

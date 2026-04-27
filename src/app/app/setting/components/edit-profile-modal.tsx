@@ -5,7 +5,7 @@ import {
   useUpdateUserAvatar,
   useUpdateUserName,
   useUser,
-} from "@/hooks/use-user";
+} from "@/hooks/useUser";
 import { UserSchema } from "@/lib/validations/user";
 
 interface EditProfileModalProps {

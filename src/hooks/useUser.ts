@@ -5,9 +5,10 @@ import {
   updateUserAvatar,
   updateUserName,
 } from "@/lib/actions/client/profile";
+import type { User } from "@/lib/types/user";
 
 export function useUser() {
-  return useQuery({
+  return useQuery<User>({
     queryKey: ["user"],
     queryFn: getUser,
   });
