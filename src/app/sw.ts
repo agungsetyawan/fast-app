@@ -31,6 +31,17 @@ const serwist = new Serwist({
     // Mutation (POST, PATCH, DELETE) tidak boleh di-cache
     {
       matcher: /.*\/rest\/v1\/.*/,
+      method: "POST",
+      handler: new NetworkOnly(),
+    },
+    {
+      matcher: /.*\/rest\/v1\/.*/,
+      method: "PATCH",
+      handler: new NetworkOnly(),
+    },
+    {
+      matcher: /.*\/rest\/v1\/.*/,
+      method: "DELETE",
       handler: new NetworkOnly(),
     },
 
