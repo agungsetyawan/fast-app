@@ -10,7 +10,7 @@ async function getClaims() {
   return data.claims;
 }
 
-async function SimulasiCreditData(createdBy: string | undefined) {
+async function SimulasiCreditData(createdBy: string) {
   const supabase = await createClient();
   const { data: simulasiCredit, error } = await supabase
     .from("simulasi_kredit")
@@ -22,7 +22,7 @@ async function SimulasiCreditData(createdBy: string | undefined) {
   return simulasiCredit;
 }
 
-async function SimulasiBudgetData(createdBy: string | undefined) {
+async function SimulasiBudgetData(createdBy: string) {
   const supabase = await createClient();
   const { data: simulasiBudget, error } = await supabase
     .from("simulasi_budget")
@@ -36,7 +36,7 @@ async function SimulasiBudgetData(createdBy: string | undefined) {
 
 export default async function Page() {
   const claims = await getClaims();
-  const createdBy = claims?.email;
+  const createdBy = claims?.email ?? "";
 
   const budget = await SimulasiBudgetData(createdBy);
   const credit = await SimulasiCreditData(createdBy);

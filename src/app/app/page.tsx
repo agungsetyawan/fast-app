@@ -4,7 +4,7 @@ import Loading from "@/components/ui/loading";
 import { createClient } from "@/lib/supabase/server";
 import SimulationBarChart from "./components/simulation-bar-chart";
 
-const THIS_YEAR = new Date().getFullYear().toString();
+const THIS_YEAR = new Date().getFullYear();
 const MONTH = [
   "Jan",
   "Feb",
@@ -36,10 +36,7 @@ async function getClaims() {
   return data.claims;
 }
 
-async function SimulasiUserViewData(
-  createdBy: string | undefined,
-  year: string = "2026",
-) {
+async function SimulasiUserViewData(createdBy: string, year: number = 2026) {
   const supabase = await createClient();
   const { data: simulasiUserViewData } = await supabase
     .from("apps_dashboard_metrics_average_user")
@@ -50,10 +47,7 @@ async function SimulasiUserViewData(
   return simulasiUserViewData;
 }
 
-async function SimulasiBudgetViewData(
-  createdBy: string | undefined,
-  year: string = "2026",
-) {
+async function SimulasiBudgetViewData(createdBy: string, year: number = 2026) {
   const supabase = await createClient();
   const { data: simulasiBudgetView } = await supabase
     .from("apps_dashboard_metrics_simulation_budget_user")
@@ -64,10 +58,7 @@ async function SimulasiBudgetViewData(
   return simulasiBudgetView;
 }
 
-async function SimulasiCreditViewData(
-  createdBy: string | undefined,
-  year: string = "2026",
-) {
+async function SimulasiCreditViewData(createdBy: string, year: number = 2026) {
   const supabase = await createClient();
   const { data: simulasiCreditView } = await supabase
     .from("apps_dashboard_metrics_simulation_credit_user")
@@ -80,7 +71,7 @@ async function SimulasiCreditViewData(
 
 export default async function AppPage() {
   const claims = await getClaims();
-  const createdBy = claims?.email;
+  const createdBy = claims?.email ?? "";
 
   const [simulasiBudgetView, simulasiCreditView, simulasiViewData] =
     await Promise.all([
