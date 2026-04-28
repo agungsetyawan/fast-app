@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const DealerSchema = z.object({
-  id: z.string(),
+  id: z.uuid(),
   name: z.string(),
   tipe_dealer: z.string(),
   is_enable: z.boolean(),
