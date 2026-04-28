@@ -1,6 +1,6 @@
 "use client";
 
-import ApexCharts, { type ApexOptions } from "apexcharts";
+import type { ApexOptions } from "apexcharts";
 import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 
@@ -8,6 +8,11 @@ type Props = {
   budgetData: number[];
   creditData: number[];
   categories: string[];
+};
+
+type ChartInstance = {
+  render: () => Promise<unknown> | unknown;
+  destroy: () => void;
 };
 
 export default function SimulationBarChart({
@@ -20,10 +25,12 @@ export default function SimulationBarChart({
 
   useEffect(() => {
     if (!chartRef.current) return;
+    let chart: ChartInstance | null = null;
+    let isMounted = true;
 
     const options: ApexOptions = {
       theme: {
-        mode: theme as "light" | "dark" | undefined,
+        mode: theme === "dark" ? "dark" : "light",
       },
       series: [
         {
@@ -73,7 +80,7 @@ export default function SimulationBarChart({
         intersect: false,
       },
       xaxis: {
-        categories: categories,
+        categories,
         axisTicks: { show: false },
         axisBorder: { show: false },
         labels: {
@@ -105,11 +112,20 @@ export default function SimulationBarChart({
       },
     };
 
-    const chart = new ApexCharts(chartRef.current, options);
-    chart.render();
+    async function renderChart() {
+      const { default: ApexCharts } = await import("apexcharts");
+      if (!isMounted || !chartRef.current) return;
+
+      const instance = new ApexCharts(chartRef.current, options);
+      chart = instance;
+      await instance.render();
+    }
+
+    void renderChart();
 
     return () => {
-      chart.destroy();
+      isMounted = false;
+      chart?.destroy();
     };
   }, [theme, budgetData, creditData, categories]);
 

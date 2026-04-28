@@ -1,6 +1,5 @@
 "use client";
 
-import jsPDF from "jspdf";
 import {
   Banknote,
   Calculator,
@@ -11,7 +10,7 @@ import {
   File,
   X,
 } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type DataType = {
   id: string;
@@ -54,9 +53,17 @@ export default function ReportTab({
   simulasiBudget: DataType[];
   simulasiCredit: DataType[];
 }) {
-  // PDF
+  const modalRef = useRef<HTMLDialogElement>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const generatePDF = (item: DataType) => {
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    };
+  }, [pdfUrl]);
+
+  const generatePDF = async (item: DataType) => {
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF();
     //doc.addImage("/logo.png", "PNG", 150, 10, 40, 15);
     // ===== Header =====
@@ -130,6 +137,11 @@ export default function ReportTab({
     setPdfUrl(url);
   };
 
+  const closePreview = () => {
+    modalRef.current?.close();
+    setPdfUrl(null);
+  };
+
   const [activeTab, setActiveTab] = useState<TabKey>("budget");
   const [tabStates, setTabStates] = useState<Record<TabKey, TabState>>({
     budget: { ...DEFAULT_TAB_STATE },
@@ -160,11 +172,9 @@ export default function ReportTab({
 
   const [selectedItem, setSelectedItem] = useState<DataType | null>(null);
 
-  const modalRef = useRef<HTMLDialogElement>(null);
-
-  const handlePreview = (item: DataType) => {
+  const handlePreview = async (item: DataType) => {
     setSelectedItem(item);
-    generatePDF(item);
+    await generatePDF(item);
     modalRef.current?.showModal();
   };
 
@@ -403,10 +413,7 @@ export default function ReportTab({
             <button
               type="button"
               className="btn btn-ghost btn-sm"
-              onClick={() => {
-                modalRef.current?.close();
-                setPdfUrl(null);
-              }}
+              onClick={closePreview}
             >
               <X size={20} />
               Close
