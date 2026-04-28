@@ -1,6 +1,6 @@
 "use client";
 
-import { clearAllCache } from "@/lib/query/mutation-defaults";
+import { clearAllCache } from "@/lib/query/cache";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 

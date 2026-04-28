@@ -4,6 +4,7 @@ import {
   getVehicleModelByBrand,
   getVehicleTypeByModel,
 } from "@/lib/actions/client/vehicle";
+import { queryKeys } from "@/lib/query/keys";
 import type {
   VehicleBrand,
   VehicleModel,
@@ -12,14 +13,14 @@ import type {
 
 export function useVehicleBrand() {
   return useQuery<VehicleBrand[]>({
-    queryKey: ["vehicleBrand"],
+    queryKey: queryKeys.vehicleBrand,
     queryFn: () => getVehicleBrand(),
   });
 }
 
 export function useVehicleModel(brandId: string) {
   return useQuery<VehicleModel[]>({
-    queryKey: ["vehicleModel", brandId],
+    queryKey: queryKeys.vehicleModel(brandId),
     queryFn: () => getVehicleModelByBrand(brandId),
     enabled: !!brandId,
   });
@@ -27,7 +28,7 @@ export function useVehicleModel(brandId: string) {
 
 export function useVehicleType(modelId: string) {
   return useQuery<VehicleType[]>({
-    queryKey: ["vehicleType", modelId],
+    queryKey: queryKeys.vehicleType(modelId),
     queryFn: () => getVehicleTypeByModel(modelId),
     enabled: !!modelId,
   });

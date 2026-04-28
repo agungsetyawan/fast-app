@@ -1,50 +1,40 @@
 import { toast } from "sonner";
-import {
-  syncPendingNameUpdate,
-  updateUserName,
-} from "@/lib/actions/client/profile";
-import { getDB } from "@/lib/db/idb";
+import { updateUserName } from "@/lib/actions/client/profile";
 import { queryClient } from "@/lib/query/client";
+import { mutationKeys, queryKeys } from "@/lib/query/keys";
+
+let isMutationDefaultsRegistered = false;
+
+type MutationDefaultRegistration = {
+  register: () => void;
+};
+
+const mutationDefaultRegistrations: MutationDefaultRegistration[] = [
+  // Tambahkan default mutation baru di sini agar offline mutation bisa dipulihkan setelah app restart.
+  {
+    register: () => {
+      queryClient.setMutationDefaults(mutationKeys.updateUser, {
+        mutationFn: updateUserName,
+        networkMode: "always",
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({ queryKey: queryKeys.user });
+          toast.success("Nama berhasil diperbarui");
+        },
+        onError: (err: Error) => {
+          if (err.message === "offline") return;
+          toast.error(err.message);
+        },
+      });
+    },
+  },
+];
 
 export function registerMutationDefaults() {
-  queryClient.setMutationDefaults(["updateUser"], {
-    mutationFn: updateUserName,
-    networkMode: "always",
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["user"] });
-      toast.success("Nama berhasil diperbarui");
-    },
-    onError: (err: Error) => {
-      if (err.message === "offline") return;
-      toast.error(err.message);
-    },
-  });
+  if (isMutationDefaultsRegistered) return;
 
-  // Nanti kalau ada setMutationDefaults lain, tambah di sini
-  // queryClient.setMutationDefaults(["xxx"], {}
-}
-
-export async function syncPendingMutations() {
-  console.log("syncPendingMutations called");
-  try {
-    const synced = await syncPendingNameUpdate();
-    console.log("synced:", synced);
-    if (synced) {
-      await queryClient.invalidateQueries({ queryKey: ["user"] });
-      toast.success("Nama berhasil disinkronkan");
-    }
-  } catch (err) {
-    toast.error("Gagal sinkronisasi data");
-    console.error("Sync error:", err);
+  for (const { register } of mutationDefaultRegistrations) {
+    register();
   }
 
-  // Nanti kalau ada pending mutations lain, tambah di sini
-  // await syncPendingProductUpdate();
-}
-
-export async function clearAllCache() {
-  queryClient.clear();
-  const db = await getDB();
-  await db.clear("query-cache");
-  await db.clear("form-drafts");
+  isMutationDefaultsRegistered = true;
 }

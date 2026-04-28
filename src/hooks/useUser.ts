@@ -5,11 +5,12 @@ import {
   updateUserAvatar,
   updateUserName,
 } from "@/lib/actions/client/profile";
+import { mutationKeys, queryKeys } from "@/lib/query/keys";
 import type { User } from "@/lib/types/user";
 
 export function useUser() {
   return useQuery<User>({
-    queryKey: ["user"],
+    queryKey: queryKeys.user,
     queryFn: getUser,
   });
 }
@@ -18,19 +19,19 @@ export function useUpdateUserName() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ["updateUser"],
+    mutationKey: mutationKeys.updateUser,
     mutationFn: updateUserName,
     networkMode: "always",
     onMutate: async (name) => {
-      // Optimistic update — UI langsung update tanpa tunggu server
-      await queryClient.cancelQueries({ queryKey: ["user"] });
-      const prev = queryClient.getQueryData(["user"]);
-      // biome-ignore lint/suspicious/noExplicitAny: <>
-      queryClient.setQueryData(["user"], (old: any) => ({ ...old, name }));
+      await queryClient.cancelQueries({ queryKey: queryKeys.user });
+      const prev = queryClient.getQueryData<User>(queryKeys.user);
+      queryClient.setQueryData<User>(queryKeys.user, (old) =>
+        old ? { ...old, name } : old,
+      );
       return { prev };
     },
     onError: (err, _, context) => {
-      queryClient.setQueryData(["user"], context?.prev);
+      queryClient.setQueryData(queryKeys.user, context?.prev);
       toast.error(err.message);
     },
     onSuccess: async (data) => {
@@ -38,7 +39,7 @@ export function useUpdateUserName() {
         toast.info("Tersimpan, akan disinkronkan saat online");
         return;
       }
-      await queryClient.invalidateQueries({ queryKey: ["user"] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.user });
       toast.success("Nama berhasil diperbarui");
     },
   });
@@ -51,7 +52,7 @@ export function useUpdateUserAvatar() {
     mutationFn: updateUserAvatar,
     onError: (err) => toast.error(err.message),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["user"] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.user });
       toast.success("Avatar berhasil diperbarui");
     },
   });
