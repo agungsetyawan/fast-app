@@ -4,6 +4,8 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import {
   type Paket,
+  type PaketDetail,
+  PaketDetailSchema,
   type PaketDp,
   PaketDpSchema,
   PaketSchema,
@@ -64,4 +66,53 @@ export async function getPaketTenor(paketId: string): Promise<PaketTenor[]> {
   if (error) throw new Error(`Fetch paket tenor failed: ${error.message}`);
 
   return z.array(PaketTenorSchema).parse(paketTenor);
+}
+
+export async function getPaketDetail(
+  paketId: string,
+  branchId: string,
+): Promise<PaketDetail[]> {
+  const supabase = createClient();
+  const { data: paketDetails, error } = await supabase
+    .from("v_paket_rate")
+    .select("*")
+    .eq("paket_id", paketId)
+    .eq("branch_id", branchId)
+    .order("percent_dp", { ascending: true })
+    .order("tipe_angsuran", { ascending: true })
+    .order("tenor", { ascending: true });
+
+  const mappedPaketDetail = paketDetails?.reduce<PaketDetail[]>((acc, item) => {
+    let dpGroup = acc.find((d) => d.percent_dp === item.percent_dp);
+    if (!dpGroup) {
+      dpGroup = {
+        percent_dp: item.percent_dp ?? 0,
+        percent_dic: item.percent_dic ?? 0,
+        percent_provisi: item.percent_provisi ?? 0,
+        types: [],
+      };
+      acc.push(dpGroup);
+    }
+
+    let typeGroup = dpGroup.types.find(
+      (t) => t.tipe_angsuran === item.tipe_angsuran,
+    );
+    if (!typeGroup) {
+      typeGroup = { tipe_angsuran: item.tipe_angsuran ?? "", details: [] };
+      dpGroup.types.push(typeGroup);
+    }
+
+    typeGroup.details.push({
+      tenor: item.tenor ?? 0,
+      rate: item.percent_selling_rate ?? 0,
+    });
+
+    typeGroup.details.sort((a, b) => a.tenor - b.tenor);
+
+    return acc;
+  }, []);
+
+  if (error) throw new Error(`Fetch paket detail failed: ${error.message}`);
+
+  return z.array(PaketDetailSchema).parse(mappedPaketDetail);
 }

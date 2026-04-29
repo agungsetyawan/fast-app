@@ -7,6 +7,7 @@ export const DealerSchema = z.object({
   is_enable: z.boolean(),
   address: z.string().nullable(),
   pic: z.string().nullable(),
+  branch_dealer_mapping_id: z.uuid(),
 });
 
 export type Dealer = z.infer<typeof DealerSchema>;

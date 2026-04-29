@@ -129,7 +129,7 @@ export type Database = {
             foreignKeyName: "area_branch_grouping_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["branch_id"]
           },
         ]
@@ -725,7 +725,7 @@ export type Database = {
             foreignKeyName: "branch_dealer_mapping_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["branch_id"]
           },
           {
@@ -990,6 +990,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "life_insurance_paket_mapping_life_insurance_id_fkey"
+            columns: ["life_insurance_id"]
+            isOneToOne: false
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["life_insurance_id"]
+          },
+          {
             foreignKeyName: "life_insurance_paket_mapping_paket_id_fkey"
             columns: ["paket_id"]
             isOneToOne: false
@@ -1000,7 +1007,14 @@ export type Database = {
             foreignKeyName: "life_insurance_paket_mapping_paket_id_fkey"
             columns: ["paket_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["paket_id"]
+          },
+          {
+            foreignKeyName: "life_insurance_paket_mapping_paket_id_fkey"
+            columns: ["paket_id"]
+            isOneToOne: false
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["paket_id"]
           },
         ]
@@ -1153,6 +1167,13 @@ export type Database = {
             referencedRelation: "life_insurance"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "life_insurance_default_premi_mapping_life_insurance_id_fkey"
+            columns: ["life_insurance_id"]
+            isOneToOne: false
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["life_insurance_id"]
+          },
         ]
       }
       life_insurance_setting: {
@@ -1208,6 +1229,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "life_insurance"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "life_insurance_setting_life_insurance_id_fkey"
+            columns: ["life_insurance_id"]
+            isOneToOne: false
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["life_insurance_id"]
           },
         ]
       }
@@ -1460,7 +1488,7 @@ export type Database = {
             foreignKeyName: "paket_branch_setting_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["branch_id"]
           },
           {
@@ -1474,7 +1502,14 @@ export type Database = {
             foreignKeyName: "paket_branch_setting_paket_id_fkey"
             columns: ["paket_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["paket_id"]
+          },
+          {
+            foreignKeyName: "paket_branch_setting_paket_id_fkey"
+            columns: ["paket_id"]
+            isOneToOne: false
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["paket_id"]
           },
         ]
@@ -1581,7 +1616,14 @@ export type Database = {
             foreignKeyName: "paket_dp_paket_id_fkey"
             columns: ["paket_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["paket_id"]
+          },
+          {
+            foreignKeyName: "paket_dp_paket_id_fkey"
+            columns: ["paket_id"]
+            isOneToOne: false
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["paket_id"]
           },
         ]
@@ -1691,7 +1733,7 @@ export type Database = {
             foreignKeyName: "paket_rule_branch_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["branch_id"]
           },
           {
@@ -1705,7 +1747,14 @@ export type Database = {
             foreignKeyName: "paket_rule_branch_paket_id_fkey"
             columns: ["paket_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["paket_id"]
+          },
+          {
+            foreignKeyName: "paket_rule_branch_paket_id_fkey"
+            columns: ["paket_id"]
+            isOneToOne: false
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["paket_id"]
           },
         ]
@@ -1766,7 +1815,14 @@ export type Database = {
             foreignKeyName: "paket_rule_dealer_paket_id_fkey"
             columns: ["paket_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["paket_id"]
+          },
+          {
+            foreignKeyName: "paket_rule_dealer_paket_id_fkey"
+            columns: ["paket_id"]
+            isOneToOne: false
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["paket_id"]
           },
         ]
@@ -1834,7 +1890,14 @@ export type Database = {
             foreignKeyName: "paket_rule_jenis_kendaraan_paket_id_fkey"
             columns: ["paket_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["paket_id"]
+          },
+          {
+            foreignKeyName: "paket_rule_jenis_kendaraan_paket_id_fkey"
+            columns: ["paket_id"]
+            isOneToOne: false
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["paket_id"]
           },
         ]
@@ -1897,7 +1960,7 @@ export type Database = {
             foreignKeyName: "paket_subsidy_mapping_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["branch_id"]
           },
           {
@@ -1976,7 +2039,14 @@ export type Database = {
             foreignKeyName: "paket_subsidy_type_paket_id_fkey"
             columns: ["paket_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["paket_id"]
+          },
+          {
+            foreignKeyName: "paket_subsidy_type_paket_id_fkey"
+            columns: ["paket_id"]
+            isOneToOne: false
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["paket_id"]
           },
           {
@@ -2043,7 +2113,14 @@ export type Database = {
             foreignKeyName: "paket_tenor_setting_paket_id_fkey"
             columns: ["paket_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_life_insurance_premi"
+            referencedColumns: ["paket_id"]
+          },
+          {
+            foreignKeyName: "paket_tenor_setting_paket_id_fkey"
+            columns: ["paket_id"]
+            isOneToOne: false
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["paket_id"]
           },
         ]
@@ -2352,13 +2429,13 @@ export type Database = {
       }
       simulasi_kredit: {
         Row: {
+          admin_fee: number | null
           angsuran: number
           area: string
           asuransi_jiwa: string
           asuransi_jiwa_prepaid_onloan: string | null
           asuransi_kendaraan: string
           asuransi_kendaraan_prepaid_onloan: string | null
-          biaya_admin: number | null
           branch: string
           coverage_pa: number | null
           created_at: string
@@ -2378,6 +2455,7 @@ export type Database = {
           jenis_penggunaan: string | null
           merk_kendaraan: string
           model_kendaraan: string
+          other_fee: number | null
           otr: number | null
           pa_passenger: number | null
           paket_id: string | null
@@ -2396,13 +2474,13 @@ export type Database = {
           updated_by: string
         }
         Insert: {
+          admin_fee?: number | null
           angsuran: number
           area: string
           asuransi_jiwa: string
           asuransi_jiwa_prepaid_onloan?: string | null
           asuransi_kendaraan: string
           asuransi_kendaraan_prepaid_onloan?: string | null
-          biaya_admin?: number | null
           branch: string
           coverage_pa?: number | null
           created_at?: string
@@ -2422,6 +2500,7 @@ export type Database = {
           jenis_penggunaan?: string | null
           merk_kendaraan: string
           model_kendaraan: string
+          other_fee?: number | null
           otr?: number | null
           pa_passenger?: number | null
           paket_id?: string | null
@@ -2440,13 +2519,13 @@ export type Database = {
           updated_by: string
         }
         Update: {
+          admin_fee?: number | null
           angsuran?: number
           area?: string
           asuransi_jiwa?: string
           asuransi_jiwa_prepaid_onloan?: string | null
           asuransi_kendaraan?: string
           asuransi_kendaraan_prepaid_onloan?: string | null
-          biaya_admin?: number | null
           branch?: string
           coverage_pa?: number | null
           created_at?: string
@@ -2466,6 +2545,7 @@ export type Database = {
           jenis_penggunaan?: string | null
           merk_kendaraan?: string
           model_kendaraan?: string
+          other_fee?: number | null
           otr?: number | null
           pa_passenger?: number | null
           paket_id?: string | null
@@ -2633,7 +2713,7 @@ export type Database = {
             foreignKeyName: "users_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["branch_id"]
           },
         ]
@@ -2727,7 +2807,7 @@ export type Database = {
             foreignKeyName: "area_branch_grouping_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["branch_id"]
           },
         ]
@@ -3005,7 +3085,7 @@ export type Database = {
             foreignKeyName: "users_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["branch_id"]
           },
         ]
@@ -3035,12 +3115,31 @@ export type Database = {
             foreignKeyName: "users_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
-            referencedRelation: "v_selling_rate"
+            referencedRelation: "v_paket_rate"
             referencedColumns: ["branch_id"]
           },
         ]
       }
-      v_selling_rate: {
+      v_life_insurance_premi: {
+        Row: {
+          affinity: number | null
+          garda_healthtech: number | null
+          is_premi_overridden: boolean | null
+          is_setting_overridden: boolean | null
+          jumlah_tertanggung: number | null
+          life_insurance_id: string | null
+          life_insurance_name: string | null
+          mapping_is_enable: boolean | null
+          paket_id: string | null
+          paket_name: string | null
+          percent_premi: number | null
+          prepaid_onloan: string | null
+          setting_is_enable: boolean | null
+          tenor: number | null
+        }
+        Relationships: []
+      }
+      v_paket_rate: {
         Row: {
           branch_id: string | null
           branch_name: string | null

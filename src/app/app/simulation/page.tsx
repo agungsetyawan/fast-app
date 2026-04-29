@@ -1,10 +1,11 @@
 "use client";
 
-import type { ChangeEvent } from "react";
-import { useEffect, useState } from "react";
+import { type ChangeEvent, useActionState, useEffect, useState } from "react";
 import { useAreaBranchGrouping } from "@/hooks/useArea";
 import { useDealer } from "@/hooks/useDealer";
-import { usePaket, usePaketDp } from "@/hooks/usePaket";
+import { useOtherFee } from "@/hooks/useFee";
+import { useLifeInsurance } from "@/hooks/useLifeInsurance";
+import { usePaket, usePaketDetail, usePaketDp } from "@/hooks/usePaket";
 import { useParamSetting } from "@/hooks/useParamSetting";
 import { useUser } from "@/hooks/useUser";
 import {
@@ -75,6 +76,7 @@ const DEFAULT_PREDEFINE = {
   tjh: "10000000",
   paCoverage: "50000000",
   tipeDepresiasi: "Normal",
+  lifeInsurancePrepaidOnloan: "Onloan",
 } as const;
 
 export default function Page() {
@@ -89,6 +91,7 @@ export default function Page() {
   // Dealer
   const { data: dealer, isLoading: isLoadingDealer } = useDealer(branchId);
   const [dealerId, setDealerId] = useState<string>("");
+  const selectedDealer = dealer?.find((item) => item.id === dealerId);
   const handleDealerChange = (value: string) => {
     setDealerId(value);
     setVehicleBrandId(DEFAULT_PREDEFINE.vehicleBrandId);
@@ -131,10 +134,15 @@ export default function Page() {
     vehicleModelId,
   );
   const [paketId, setPaketId] = useState<string>("");
+  const selectedPaket = paket?.find((item) => item.id === paketId);
 
   // Paket DP
   const { data: paketDp, isLoading: isLoadingPaketDp } = usePaketDp(paketId);
   const minDp = paketDp?.[0]?.percent_dp ?? 0;
+  const [dp, setDp] = useState<string>("");
+  useEffect(() => {
+    setDp(minDp.toString());
+  }, [minDp]);
 
   const [tipeAngsuran, setTipeAngsuran] = useState<string>(
     DEFAULT_PREDEFINE.tipeAngsuran,
@@ -147,6 +155,33 @@ export default function Page() {
     DEFAULT_PREDEFINE.jenisPenggunaan,
   );
 
+  // Paket Detail
+  const { data: paketDetail } = usePaketDetail(paketId, branchId);
+  const targetDpPercent = paketDp
+    ?.filter((val) => val.percent_dp <= Number(dp ?? 0))
+    .reduce((max, curr) => Math.max(max, curr.percent_dp), 0);
+  const selectedPaketDetail = paketDetail
+    ?.filter((item) => item.percent_dp === targetDpPercent)
+    .map((item) => {
+      const type = item.types.find((t) => t.tipe_angsuran === tipeAngsuran);
+      const detail = type?.details?.find((d) => d.tenor === Number(tenor));
+      return {
+        percent_dp: item.percent_dp,
+        percent_dic: item.percent_dic,
+        percent_provisi: item.percent_provisi,
+        rate: detail?.rate || 0,
+      };
+    })[0];
+  const [rate, setRate] = useState<string>("");
+  const [provisi, setProvisi] = useState<string>("");
+  const [dic, setDic] = useState<string>("");
+  useEffect(() => {
+    setRate(selectedPaketDetail?.rate?.toString() ?? "0");
+    setProvisi(selectedPaketDetail?.percent_provisi?.toString() ?? "0");
+    setDic(selectedPaketDetail?.percent_dic?.toString() ?? "0");
+  }, [selectedPaketDetail]);
+
+  // Vehicle Insurance
   const { data: areaBranchGrouping } = useAreaBranchGrouping(branchId);
 
   const { data: vehicleInsurance, isLoading: isLoadingVehicleInsurance } =
@@ -173,6 +208,141 @@ export default function Page() {
     DEFAULT_PREDEFINE.paCoverage,
   );
 
+  // Life Insurance
+  const { data: lifeInsurance, isLoading: isLoadingLifeInsurance } =
+    useLifeInsurance(paketId);
+  const [lifeInsuranceId, setLifeInsuranceId] = useState<string>("");
+  const selectedLifeInsurance = lifeInsurance?.find(
+    (item) => item.id === lifeInsuranceId,
+  );
+  const [lifeInsurancePrepaidOnloan, setLifeInsurancePrepaidOnloan] =
+    useState<string>(DEFAULT_PREDEFINE.lifeInsurancePrepaidOnloan);
+  const [jumlahTertanggung, setJumlahTertanggung] = useState<string>("");
+  useEffect(() => {
+    setLifeInsurancePrepaidOnloan(selectedLifeInsurance?.prepaid_onloan ?? "");
+    setJumlahTertanggung(
+      selectedLifeInsurance?.jumlah_tertanggung?.toString() ?? "",
+    );
+  }, [selectedLifeInsurance]);
+
+  // Fee
+  const defaultBiayaPolis = paramSetting?.find(
+    (item) => item.param_name === "param_default_biaya_polis",
+  )?.param_value;
+  const defaultBiayaAdmin = paramSetting?.find(
+    (item) => item.param_name === "param_default_biaya_admin",
+  )?.param_value;
+
+  const [provisiDic, setProvisiDic] = useState<string>("provisi");
+
+  const { data: otherFee, isLoading: isLoadingOtherFee } = useOtherFee(
+    selectedDealer?.branch_dealer_mapping_id || "",
+  );
+  const [otherFeeValue, setOtherFeeValue] = useState<string>("");
+  useEffect(() => {
+    setOtherFeeValue(otherFee?.min_value?.toString() ?? "0");
+  }, [otherFee]);
+
+  type ActionState = {
+    error: string | null;
+    success: boolean;
+    email: string;
+  };
+
+  const initialState: ActionState = {
+    error: null,
+    success: false,
+    email: "",
+  };
+  // Form State
+  const calculate = async (
+    prevState: ActionState,
+    formData: FormData,
+  ): Promise<ActionState> => {
+    const branchName = formData.get("branch_name") as string;
+    const dealerId = formData.get("dealerId") as string;
+    const vehicleBrandId = formData.get("vehicleBrandId") as string;
+    const vehicleModelId = formData.get("vehicleModelId") as string;
+    const vehicleTypeId = formData.get("vehicleTypeId") as string;
+    const paketId = formData.get("paketId") as string;
+    const otr = formData.get("otr") as string;
+    const dp = formData.get("dp") as string;
+    const tipeAngsuran = formData.get("tipe_angsuran") as string;
+    const tenor = formData.get("tenor") as string;
+    const tipePembiayaan = formData.get("tipe_pembiayaan") as string;
+    const jenisPenggunaan = formData.get("jenis_penggunaan") as string;
+    const areaAsuransiKendaraanName = formData.get(
+      "area_asuransi_kendaraan_name",
+    ) as string;
+    const asuransiKendaraan = formData.get("asuransi_kendaraan") as string;
+    const jenisAsuransi = formData.get("jenis_asuransi") as string;
+    const prepaidOnloan = formData.get("prepaid_onloan") as string;
+    const tipeDepresiasi = formData.get("tipe_depresiasi") as string;
+    const isBundleRfe = formData.get("is_bundlerfe") as string;
+    const isTs = formData.get("is_ts") as string;
+    const isPadriver = formData.get("is_padriver") as string;
+    const isPai = formData.get("is_pai") as string;
+    const paPassenger = formData.get("pa_passenger") as string;
+    const tjh = formData.get("tjh") as string;
+    const paCoverage = formData.get("pa_coverage") as string;
+    const lifeInsuranceId = formData.get("life_insurance_id") as string;
+    const lifeInsurancePrepaidOnloan = formData.get(
+      "life_insurance_prepaid_onloan",
+    ) as string;
+    const isAffinity = formData.get("is_affinity") as string;
+    const isGht = formData.get("is_ght") as string;
+    const jumlahTertanggung = formData.get("jumlah_tertanggung") as string;
+    const rate = formData.get("rate") as string;
+    const provisi = formData.get("provisi") as string;
+    const dic = formData.get("dic") as string;
+    const policyFee = formData.get("policy_fee") as string;
+    const adminFee = formData.get("admin_fee") as string;
+    const otherFee = formData.get("other_fee") as string;
+
+    console.log(
+      branchName,
+      dealerId,
+      vehicleBrandId,
+      vehicleModelId,
+      vehicleTypeId,
+      paketId,
+      otr,
+      dp,
+      tipeAngsuran,
+      tenor,
+      tipePembiayaan,
+      jenisPenggunaan,
+      areaAsuransiKendaraanName,
+      asuransiKendaraan,
+      jenisAsuransi,
+      prepaidOnloan,
+      tipeDepresiasi,
+      isBundleRfe,
+      isTs,
+      isPadriver,
+      isPai,
+      paPassenger,
+      tjh,
+      paCoverage,
+      lifeInsuranceId,
+      lifeInsurancePrepaidOnloan,
+      isAffinity,
+      isGht,
+      jumlahTertanggung,
+      rate,
+      provisi,
+      dic,
+      policyFee,
+      adminFee,
+      otherFee,
+    );
+    return prevState;
+  };
+  const [_state, formAction, isCalculating] = useActionState(
+    calculate,
+    initialState,
+  );
+
   return (
     <>
       <ul className="steps w-full sticky top-16 z-50 bg-base-200 shadow">
@@ -182,15 +352,19 @@ export default function Page() {
 
       <div className="w-full flex flex-col gap-2 p-4">
         <div className="flex flex-col gap-2 items-start">
-          <form className="w-full flex flex-col gap-2">
+          <form action={formAction} className="w-full flex flex-col gap-2">
             <div className="divider">
               <div className="font-bold">General</div>
             </div>
 
-            <input type="hidden" name="branchId" value={branchId} />
             <label className="input w-full">
               <span className="label">Branch</span>
-              <input type="text" value={user?.branch_name || ""} readOnly />
+              <input
+                name="branch_name"
+                type="text"
+                value={user?.branch_name || ""}
+                readOnly
+              />
             </label>
 
             <SimulationSelect
@@ -261,42 +435,55 @@ export default function Page() {
                 label: item.name,
               }))}
             />
+            {paketId && (
+              <p className="text-xs text-warning-content">
+                Tipe Kalkulasi {selectedPaket?.paket_type}
+              </p>
+            )}
 
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">OTR</legend>
-              <label className="input w-full">
-                Rp
-                <input
-                  name="otr"
-                  type="number"
-                  className="input grow validator appearance-none"
-                  required
-                  placeholder="OTR Price"
-                  min={1}
-                  inputMode="numeric"
-                />
-              </label>
-              {/* <p className="validator-hint">OTR wajib lebih dari 0</p> */}
-            </fieldset>
+            <div className="flex gap-2">
+              <fieldset className="fieldset flex-1 md:flex-1">
+                <legend className="fieldset-legend">OTR</legend>
+                <label className="input w-full">
+                  Rp
+                  <input
+                    name="otr"
+                    type="number"
+                    className="input grow validator appearance-none"
+                    required
+                    placeholder="OTR Price"
+                    min={1}
+                    inputMode="numeric"
+                  />
+                </label>
+                {/* <p className="validator-hint">OTR wajib lebih dari 0</p> */}
+              </fieldset>
 
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">DP</legend>
-              <label className="input w-full">
-                <input
-                  name="dp"
-                  type="number"
-                  className="input grow validator appearance-none"
-                  required
-                  placeholder={`DP Percent (${minDp}%)`}
-                  min={minDp}
-                  max={100}
-                  inputMode="decimal"
-                  disabled={!paketId}
-                />
-                %
-              </label>
-              {!isLoadingPaketDp && paketId && <p>Minimum DP {minDp} %</p>}
-            </fieldset>
+              <fieldset className="fieldset md:flex-1">
+                <legend className="fieldset-legend">DP</legend>
+                <label className="input w-full">
+                  <input
+                    name="dp"
+                    type="number"
+                    className="input grow validator appearance-none"
+                    required
+                    placeholder={`DP ${minDp}%`}
+                    min={minDp}
+                    max={100}
+                    inputMode="decimal"
+                    value={dp}
+                    onChange={(e) => setDp(e.target.value)}
+                    disabled={!paketId}
+                  />
+                  %
+                </label>
+                {!isLoadingPaketDp && paketId && (
+                  <p className="text-xs text-warning-content">
+                    Minimum {minDp} %
+                  </p>
+                )}
+              </fieldset>
+            </div>
 
             <SimulationSelect
               label="Tipe Angsuran"
@@ -363,10 +550,10 @@ export default function Page() {
               <div className="font-bold">Asuransi Kendaraan</div>
             </div>
 
-            <input type="hidden" name="branchId" value={branchId} />
             <label className="input w-full">
               <span className="label">Area</span>
               <input
+                name="area_asuransi_kendaraan_name"
                 type="text"
                 value={areaBranchGrouping?.area_asuransi_kendaraan_name || ""}
                 readOnly
@@ -459,7 +646,7 @@ export default function Page() {
                       defaultChecked={selectedVehicleInsurance?.is_ts}
                       className="toggle"
                     />
-                    TS{" "}
+                    TS
                   </label>
 
                   <label className="label">
@@ -546,6 +733,273 @@ export default function Page() {
                 />
               </div>
             </details>
+
+            <div className="divider">
+              <div className="font-bold">Asuransi Jiwa</div>
+            </div>
+
+            <SimulationSelect
+              label="Asuransi Jiwa"
+              name="life_insurance_id"
+              value={lifeInsuranceId}
+              placeholder="Select Asuransi Jiwa"
+              loading={isLoadingLifeInsurance}
+              disabled={!paketId}
+              onChange={setLifeInsuranceId}
+              options={lifeInsurance?.map((item) => ({
+                id: item.id,
+                label: item.name,
+              }))}
+            />
+
+            <SimulationSelect
+              key={selectedLifeInsurance?.id}
+              label="Prepaid / Onloan"
+              name="life_insurance_prepaid_onloan"
+              value={lifeInsurancePrepaidOnloan}
+              placeholder="Select Prepaid / Onloan"
+              loading={isLoadingParamSetting}
+              disabled={!lifeInsuranceId}
+              onChange={setLifeInsurancePrepaidOnloan}
+              options={paramSetting
+                ?.filter(
+                  (item) =>
+                    item.param_name === "param_life_insurance_prepaid_onloan",
+                )
+                .map((item) => ({
+                  id: item.param_value,
+                  label: item.param_value,
+                }))}
+            />
+
+            <details className="collapse collapse-arrow bg-base-100 border border-base-300">
+              <summary className="collapse-title font-semibold text-sm">
+                Additional Coverage
+              </summary>
+              <div className="collapse-content text-sm flex flex-col gap-2">
+                <div className="flex flex-row flex-wrap gap-2">
+                  <label className="label">
+                    <input
+                      key={selectedLifeInsurance?.id}
+                      type="checkbox"
+                      name="is_affinity"
+                      disabled={!lifeInsuranceId}
+                      defaultChecked={!!selectedLifeInsurance?.affinity}
+                      className="toggle"
+                    />
+                    Affinity
+                  </label>
+
+                  <label className="label">
+                    <input
+                      key={selectedLifeInsurance?.id}
+                      type="checkbox"
+                      name="is_ght"
+                      disabled={!lifeInsuranceId}
+                      defaultChecked={!!selectedLifeInsurance?.garda_healthtech}
+                      className="toggle"
+                    />
+                    GHT
+                  </label>
+                </div>
+
+                <SimulationSelect
+                  key={selectedLifeInsurance?.id}
+                  label="Jumlah Tertanggung"
+                  name="jumlah_tertanggung"
+                  value={jumlahTertanggung}
+                  placeholder="Select Jumlah Tertanggung"
+                  loading={isLoadingParamSetting}
+                  disabled={!lifeInsuranceId}
+                  onChange={setJumlahTertanggung}
+                  options={paramSetting
+                    ?.filter((item) => item.param_name === "param_pa_passenger")
+                    ?.sort(
+                      (a, b) => Number(a.param_value) - Number(b.param_value),
+                    )
+                    .map((item) => ({
+                      id: item.param_value,
+                      label: `${item.param_value} pax`,
+                    }))}
+                />
+              </div>
+            </details>
+
+            <div className="divider">
+              <div className="font-bold">Rate & Others</div>
+            </div>
+
+            <fieldset className="fieldset md:flex-1">
+              <legend className="fieldset-legend">Rate</legend>
+              <label className="input w-full">
+                <input
+                  name="rate"
+                  type="number"
+                  className="input grow validator appearance-none"
+                  required
+                  placeholder={`Rate ${selectedPaketDetail?.rate ?? ""}%`}
+                  min={selectedPaketDetail?.rate}
+                  max={100}
+                  inputMode="decimal"
+                  value={rate}
+                  onChange={(e) => setRate(e.target.value)}
+                  disabled={!paketId}
+                />
+                %
+              </label>
+              {!isLoadingPaketDp && paketId && selectedPaketDetail?.rate && (
+                <p className="text-xs text-warning-content">
+                  Minimum rate {selectedPaketDetail?.rate} %
+                </p>
+              )}
+            </fieldset>
+
+            <SimulationSelect
+              label="Provisi / DIC"
+              name="provisi_dic"
+              value={provisiDic}
+              placeholder="Select Provisi / DIC"
+              loading={isLoadingParamSetting}
+              disabled={!paketId}
+              onChange={setProvisiDic}
+              options={[
+                {
+                  id: "provisi",
+                  label: "Provisi",
+                },
+                {
+                  id: "dic",
+                  label: "DIC",
+                },
+              ]}
+            />
+
+            {provisiDic === "provisi" && (
+              <fieldset className="fieldset md:flex-1">
+                <legend className="fieldset-legend">Provisi</legend>
+                <label className="input w-full">
+                  <input
+                    name="provisi"
+                    type="number"
+                    className="input grow validator appearance-none"
+                    required
+                    placeholder={`Provisi ${selectedPaketDetail?.percent_provisi ?? ""}%`}
+                    min={0}
+                    max={selectedPaketDetail?.percent_provisi}
+                    inputMode="decimal"
+                    value={provisi}
+                    onChange={(e) => setProvisi(e.target.value)}
+                    disabled={!paketId}
+                  />
+                  %
+                </label>
+                {!isLoadingPaketDp &&
+                  paketId &&
+                  selectedPaketDetail?.percent_provisi && (
+                    <p className="text-xs text-warning-content">
+                      Maximum provisi {selectedPaketDetail?.percent_provisi} %
+                    </p>
+                  )}
+              </fieldset>
+            )}
+            {provisiDic === "dic" && (
+              <fieldset className="fieldset md:flex-1">
+                <legend className="fieldset-legend">DIC</legend>
+                <label className="input w-full">
+                  <input
+                    name="dic"
+                    type="number"
+                    className="input grow validator appearance-none"
+                    required
+                    placeholder={`DIC ${selectedPaketDetail?.percent_dic ?? ""}%`}
+                    min={0}
+                    max={selectedPaketDetail?.percent_dic}
+                    inputMode="decimal"
+                    value={dic}
+                    onChange={(e) => setDic(e.target.value)}
+                    disabled={!paketId}
+                  />
+                  %
+                </label>
+                {!isLoadingPaketDp &&
+                  paketId &&
+                  selectedPaketDetail?.percent_dic && (
+                    <p className="text-xs text-warning-content">
+                      Maximum DIC {selectedPaketDetail?.percent_dic} %
+                    </p>
+                  )}
+              </fieldset>
+            )}
+
+            <fieldset className="fieldset md:flex-1">
+              <legend className="fieldset-legend">Biaya Polis</legend>
+              <label className="input w-full">
+                Rp
+                <input
+                  name="policy_fee"
+                  type="number"
+                  className="input grow validator appearance-none"
+                  required
+                  inputMode="decimal"
+                  defaultValue={defaultBiayaPolis}
+                  readOnly
+                />
+              </label>
+            </fieldset>
+
+            <fieldset className="fieldset md:flex-1">
+              <legend className="fieldset-legend">Biaya Admin</legend>
+              <label className="input w-full">
+                Rp
+                <input
+                  name="admin_fee"
+                  type="number"
+                  className="input grow validator appearance-none"
+                  required
+                  min={defaultBiayaAdmin}
+                  inputMode="decimal"
+                  defaultValue={defaultBiayaAdmin}
+                />
+              </label>
+              {!isLoadingParamSetting && (
+                <p className="text-xs text-warning-content">
+                  Minimum Biaya Admin {defaultBiayaAdmin}
+                </p>
+              )}
+            </fieldset>
+
+            <fieldset className="fieldset md:flex-1">
+              <legend className="fieldset-legend">Other Fee</legend>
+              <label className="input w-full">
+                Rp
+                <input
+                  name="other_fee"
+                  type="number"
+                  className="input grow validator appearance-none"
+                  required
+                  min={otherFee?.min_value ?? 0}
+                  max={otherFee?.max_value ?? 0}
+                  disabled={!dealerId}
+                  inputMode="decimal"
+                  value={otherFeeValue}
+                  onChange={(e) => setOtherFeeValue(e.target.value)}
+                />
+              </label>
+              {dealerId && !isLoadingOtherFee && otherFee?.min_value && (
+                <p className="text-xs text-warning-content">
+                  Other Fee {otherFee?.min_value ?? 0} -{" "}
+                  {otherFee?.max_value ?? 0}
+                </p>
+              )}
+            </fieldset>
+
+            <button
+              type="submit"
+              className="btn btn-primary sticky bottom-16"
+              disabled={isCalculating}
+            >
+              Submit
+            </button>
           </form>
         </div>
       </div>

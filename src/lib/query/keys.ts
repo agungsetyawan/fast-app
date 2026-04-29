@@ -5,6 +5,8 @@ export const queryKeys = {
     ["paket", branchId, dealerId, vehicleModelId] as const,
   paketDp: (paketId: string) => ["paketDp", paketId] as const,
   paketTenor: (paketId: string) => ["paketTenor", paketId] as const,
+  paketDetail: (paketId: string, branchId: string) =>
+    ["paketDetail", paketId, branchId] as const,
   paramSetting: () => ["paramSetting"] as const,
   areaBranchGrouping: (branchId: string) =>
     ["areaBranchGrouping", branchId] as const,
@@ -17,6 +19,11 @@ export const queryKeys = {
   vehicleBrand: ["vehicleBrand"] as const,
   vehicleModel: (brandId: string) => ["vehicleModel", brandId] as const,
   vehicleType: (modelId: string) => ["vehicleType", modelId] as const,
+  lifeInsuranceByPaket: (paketId: string) =>
+    ["lifeInsuranceByPaket", paketId] as const,
+  lifeInsurance: (paketId: string) => ["lifeInsurance", paketId] as const,
+  otherFee: (branchDealerMappingId: string) =>
+    ["otherFee", branchDealerMappingId] as const,
 };
 
 export const mutationKeys = {

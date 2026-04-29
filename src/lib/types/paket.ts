@@ -27,6 +27,24 @@ export const PaketTenorSchema = z.object({
   is_enable: z.boolean(),
 });
 
+export const PaketDetailSchema = z.object({
+  percent_dp: z.float32(),
+  percent_dic: z.float32(),
+  percent_provisi: z.float32(),
+  types: z.array(
+    z.object({
+      tipe_angsuran: z.string(),
+      details: z.array(
+        z.object({
+          tenor: z.number().int(),
+          rate: z.float32(),
+        }),
+      ),
+    }),
+  ),
+});
+
 export type Paket = z.infer<typeof PaketSchema>;
 export type PaketDp = z.infer<typeof PaketDpSchema>;
 export type PaketTenor = z.infer<typeof PaketTenorSchema>;
+export type PaketDetail = z.infer<typeof PaketDetailSchema>;
