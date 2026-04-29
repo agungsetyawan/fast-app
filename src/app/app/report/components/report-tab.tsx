@@ -5,13 +5,13 @@ import {
   Calculator,
   ChevronDown,
   ChevronUp,
+  Cross,
   Download,
   Eye,
   File,
-  X,
-  Van,
   HeartPulse,
-  Cross,
+  Van,
+  X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -25,21 +25,21 @@ type DataType = {
   jenis_kendaraan: string;
   merk_kendaraan: string;
   tenor?: number;
-  dealer: string;
+  dealer?: string | null;
   tipe_perhitungan: string;
-  tipe_pembiayaan: string;
-  jenis_penggunaan: string;
+  tipe_pembiayaan?: string | null;
+  jenis_penggunaan?: string | null;
   paket_confins_name?: string;
   // asuransi kendaraan
   asuransi_kendaraan?: string;
-  tipe_asuransi_kendaraan?: string;
-  asuransi_kendaraan_prepaid_onloan?: string;
-  is_rfe?: boolean;
-  is_ts?: boolean;
-  is_padriver?: boolean;
-  is_pai?: boolean;
-  pa_passenger?: number;
-  tjh_amount?: number;
+  tipe_asuransi_kendaraan?: string | null;
+  asuransi_kendaraan_prepaid_onloan?: string | null;
+  is_rfe?: boolean | null;
+  is_ts?: boolean | null;
+  is_padriver?: boolean | null;
+  is_pai?: boolean | null;
+  pa_passenger?: number | null;
+  tjh_amount?: number | null;
   coverage_pa?: number;
   tipe_depresiasi?: string;
   // asuransi jiwa
@@ -221,11 +221,11 @@ export default function ReportTab({
   const processedData = useMemo(() => {
     const filtered = search
       ? rawData.filter((item) =>
-        Object.values(item)
-          .join(" ")
-          .toLowerCase()
-          .includes(search.toLowerCase()),
-      )
+          Object.values(item)
+            .join(" ")
+            .toLowerCase()
+            .includes(search.toLowerCase()),
+        )
       : [...rawData];
 
     return filtered.sort((a, b) => {

@@ -2228,6 +2228,7 @@ export type Database = {
           diskon_asuransi_kendaraan_ph: number | null
           diskon_asuransi_kendaraan_rate: number | null
           dp: number
+          gross_yield: number | null
           id: string
           is_padriver: boolean | null
           is_pai: boolean | null
@@ -2238,7 +2239,6 @@ export type Database = {
           max_percent_dic: number | null
           max_percent_provisi: number | null
           merk_kendaraan: string
-          min_percent_selling_rate: number | null
           model_kendaraan: string
           nilai_affinity: number | null
           nilai_asuransi_kendaraan_onloan: number | null
@@ -2251,20 +2251,25 @@ export type Database = {
           other_fee: number | null
           otr: number | null
           pa_passenger: number | null
+          paket_confins_name: string | null
           paket_id: string | null
           paket_name: string
           percent_baloon: number | null
           percent_base_rate: number | null
           percent_dic: number | null
           percent_dp: number
+          percent_effective_selling_rate_final: number | null
           percent_ltv: number | null
+          percent_min_selling_rate: number | null
           percent_premi_asuransi_jiwa: number | null
           percent_provisi: number | null
           percent_selling_rate: number | null
           percent_selling_rate_efektif: number | null
+          percent_selling_rate_final: number | null
           percent_tac: number | null
           polis_asuransi: number | null
           provisi: number | null
+          subsidy_ap_to_rate: number | null
           tdp: number
           tenor: number
           tipe_angsuran: string | null
@@ -2301,6 +2306,7 @@ export type Database = {
           diskon_asuransi_kendaraan_ph?: number | null
           diskon_asuransi_kendaraan_rate?: number | null
           dp: number
+          gross_yield?: number | null
           id?: string
           is_padriver?: boolean | null
           is_pai?: boolean | null
@@ -2311,7 +2317,6 @@ export type Database = {
           max_percent_dic?: number | null
           max_percent_provisi?: number | null
           merk_kendaraan: string
-          min_percent_selling_rate?: number | null
           model_kendaraan: string
           nilai_affinity?: number | null
           nilai_asuransi_kendaraan_onloan?: number | null
@@ -2324,20 +2329,25 @@ export type Database = {
           other_fee?: number | null
           otr?: number | null
           pa_passenger?: number | null
+          paket_confins_name?: string | null
           paket_id?: string | null
           paket_name: string
           percent_baloon?: number | null
           percent_base_rate?: number | null
           percent_dic?: number | null
           percent_dp: number
+          percent_effective_selling_rate_final?: number | null
           percent_ltv?: number | null
+          percent_min_selling_rate?: number | null
           percent_premi_asuransi_jiwa?: number | null
           percent_provisi?: number | null
           percent_selling_rate?: number | null
           percent_selling_rate_efektif?: number | null
+          percent_selling_rate_final?: number | null
           percent_tac?: number | null
           polis_asuransi?: number | null
           provisi?: number | null
+          subsidy_ap_to_rate?: number | null
           tdp: number
           tenor: number
           tipe_angsuran?: string | null
@@ -2374,6 +2384,7 @@ export type Database = {
           diskon_asuransi_kendaraan_ph?: number | null
           diskon_asuransi_kendaraan_rate?: number | null
           dp?: number
+          gross_yield?: number | null
           id?: string
           is_padriver?: boolean | null
           is_pai?: boolean | null
@@ -2384,7 +2395,6 @@ export type Database = {
           max_percent_dic?: number | null
           max_percent_provisi?: number | null
           merk_kendaraan?: string
-          min_percent_selling_rate?: number | null
           model_kendaraan?: string
           nilai_affinity?: number | null
           nilai_asuransi_kendaraan_onloan?: number | null
@@ -2397,20 +2407,25 @@ export type Database = {
           other_fee?: number | null
           otr?: number | null
           pa_passenger?: number | null
+          paket_confins_name?: string | null
           paket_id?: string | null
           paket_name?: string
           percent_baloon?: number | null
           percent_base_rate?: number | null
           percent_dic?: number | null
           percent_dp?: number
+          percent_effective_selling_rate_final?: number | null
           percent_ltv?: number | null
+          percent_min_selling_rate?: number | null
           percent_premi_asuransi_jiwa?: number | null
           percent_provisi?: number | null
           percent_selling_rate?: number | null
           percent_selling_rate_efektif?: number | null
+          percent_selling_rate_final?: number | null
           percent_tac?: number | null
           polis_asuransi?: number | null
           provisi?: number | null
+          subsidy_ap_to_rate?: number | null
           tdp?: number
           tenor?: number
           tipe_angsuran?: string | null
@@ -2434,6 +2449,7 @@ export type Database = {
           area: string
           asuransi_jiwa: string
           asuransi_jiwa_prepaid_onloan: string | null
+          asuransi_jiwa_tertanggung: number | null
           asuransi_kendaraan: string
           asuransi_kendaraan_prepaid_onloan: string | null
           branch: string
@@ -2455,9 +2471,12 @@ export type Database = {
           jenis_penggunaan: string | null
           merk_kendaraan: string
           model_kendaraan: string
+          nilai_affinity: number | null
+          nilai_ght: number | null
           other_fee: number | null
           otr: number | null
           pa_passenger: number | null
+          paket_confins_name: string | null
           paket_id: string | null
           paket_name: string
           percent_dp: number
@@ -2479,6 +2498,7 @@ export type Database = {
           area: string
           asuransi_jiwa: string
           asuransi_jiwa_prepaid_onloan?: string | null
+          asuransi_jiwa_tertanggung?: number | null
           asuransi_kendaraan: string
           asuransi_kendaraan_prepaid_onloan?: string | null
           branch: string
@@ -2500,9 +2520,12 @@ export type Database = {
           jenis_penggunaan?: string | null
           merk_kendaraan: string
           model_kendaraan: string
+          nilai_affinity?: number | null
+          nilai_ght?: number | null
           other_fee?: number | null
           otr?: number | null
           pa_passenger?: number | null
+          paket_confins_name?: string | null
           paket_id?: string | null
           paket_name: string
           percent_dp: number
@@ -2524,6 +2547,7 @@ export type Database = {
           area?: string
           asuransi_jiwa?: string
           asuransi_jiwa_prepaid_onloan?: string | null
+          asuransi_jiwa_tertanggung?: number | null
           asuransi_kendaraan?: string
           asuransi_kendaraan_prepaid_onloan?: string | null
           branch?: string
@@ -2545,9 +2569,12 @@ export type Database = {
           jenis_penggunaan?: string | null
           merk_kendaraan?: string
           model_kendaraan?: string
+          nilai_affinity?: number | null
+          nilai_ght?: number | null
           other_fee?: number | null
           otr?: number | null
           pa_passenger?: number | null
+          paket_confins_name?: string | null
           paket_id?: string | null
           paket_name?: string
           percent_dp?: number
