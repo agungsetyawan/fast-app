@@ -9,6 +9,9 @@ import {
   Eye,
   File,
   X,
+  Van,
+  HeartPulse,
+  Cross,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -20,7 +23,43 @@ type DataType = {
   customer_name: string;
   model_kendaraan: string;
   jenis_kendaraan: string;
+  merk_kendaraan: string;
   tenor?: number;
+  dealer: string;
+  tipe_perhitungan: string;
+  tipe_pembiayaan: string;
+  jenis_penggunaan: string;
+  paket_confins_name?: string;
+  // asuransi kendaraan
+  asuransi_kendaraan?: string;
+  tipe_asuransi_kendaraan?: string;
+  asuransi_kendaraan_prepaid_onloan?: string;
+  is_rfe?: boolean;
+  is_ts?: boolean;
+  is_padriver?: boolean;
+  is_pai?: boolean;
+  pa_passenger?: number;
+  tjh_amount?: number;
+  coverage_pa?: number;
+  tipe_depresiasi?: string;
+  // asuransi jiwa
+  asuransi_jiwa?: string;
+  asuransi_jiwa_prepaid_onloan?: string;
+  asuransi_jiwa_tertanggung?: string;
+  nilai_affinity?: number;
+  nilai_ght?: number;
+  // calculation
+  otr: number;
+  percent_dp: number;
+  dp: number;
+  tipe_angsuran?: string;
+  percent_selling_rate?: number;
+  percent_min_selling_rate?: number;
+  percent_base_rate?: number;
+  percent_selling_rate_efektif?: number;
+  percent_selling_rate_final?: number;
+  percent_effective_selling_rate_final?: number;
+  gross_yield?: number;
 };
 
 type TabKey = "budget" | "credit";
@@ -94,6 +133,7 @@ export default function ReportTab({
       { label: "Paket Name", value: item.paket_name },
       { label: "Area", value: item.area },
       { label: "Branch", value: item.branch },
+      { label: "Dealer", value: item.dealer },
       { label: "Model Kendaraan", value: item.model_kendaraan },
       { label: "Jenis Kendaraan", value: item.jenis_kendaraan },
     ];
@@ -181,11 +221,11 @@ export default function ReportTab({
   const processedData = useMemo(() => {
     const filtered = search
       ? rawData.filter((item) =>
-          Object.values(item)
-            .join(" ")
-            .toLowerCase()
-            .includes(search.toLowerCase()),
-        )
+        Object.values(item)
+          .join(" ")
+          .toLowerCase()
+          .includes(search.toLowerCase()),
+      )
       : [...rawData];
 
     return filtered.sort((a, b) => {
@@ -265,6 +305,7 @@ export default function ReportTab({
               <SortableHeader label="Label" colKey="customer_name" />
               <SortableHeader label="Paket Name" colKey="paket_name" />
               <SortableHeader label="Branch" colKey="branch" />
+              <SortableHeader label="Dealer" colKey="dealer" />
               <SortableHeader
                 label="Model Kendaraan"
                 colKey="model_kendaraan"
@@ -290,6 +331,7 @@ export default function ReportTab({
                   <td>{item.customer_name}</td>
                   <td>{item.paket_name}</td>
                   <td>{item.branch}</td>
+                  <td>{item.dealer}</td>
                   <td>{item.model_kendaraan}</td>
                   <td>{item.jenis_kendaraan}</td>
                   <th className="bg-base-100 text-center">
@@ -367,25 +409,160 @@ export default function ReportTab({
               {selectedItem?.paket_name}
             </div>
             <div>
-              <span className="font-semibold">Model Kendaraan</span>
-              <br />
-              {selectedItem?.model_kendaraan}
-            </div>
-            <div>
-              <span className="font-semibold">Jenis Kendaraan</span>
-              <br />
-              {selectedItem?.jenis_kendaraan}
-            </div>
-            <div>
               <span className="font-semibold">Branch</span>
               <br />
               {selectedItem?.branch}
             </div>
             <div>
-              <span className="font-semibold">Area Asuransi</span>
+              <span className="font-semibold">Dealer</span>
+              <br />
+              {selectedItem?.dealer}
+            </div>
+            <div>
+              <span className="font-semibold">Vehicle Brand</span>
+              <br />
+              {selectedItem?.merk_kendaraan}
+            </div>
+            <div>
+              <span className="font-semibold">Vehicle Model</span>
+              <br />
+              {selectedItem?.model_kendaraan}
+            </div>
+            <div>
+              <span className="font-semibold">Vehicle Type</span>
+              <br />
+              {selectedItem?.jenis_kendaraan}
+            </div>
+            <div>
+              <span className="font-semibold">Calculation Type</span>
+              <br />
+              {selectedItem?.tipe_perhitungan}
+            </div>
+            <div>
+              <span className="font-semibold">Financing Type</span>
+              <br />
+              {selectedItem?.tipe_pembiayaan}
+            </div>
+            <div>
+              <span className="font-semibold">Usage Type</span>
+              <br />
+              {selectedItem?.jenis_penggunaan}
+            </div>
+          </div>
+
+          {/* Vehicle Insurance */}
+          <div className="text-sm">
+            <span className="font-bold flex items-center gap-2">
+              <Van size={16} />
+              Vehicle Insurance Information
+            </span>
+          </div>
+          <div className="py-4 grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <span className="font-semibold">Vehicle Insurance Area</span>
               <br />
               {selectedItem?.area}
             </div>
+            <div>
+              <span className="font-semibold">Vehicle Insurance</span>
+              <br />
+              {selectedItem?.asuransi_kendaraan}
+            </div>
+            <div>
+              <span className="font-semibold">Vehicle Insurance Type</span>
+              <br />
+              {selectedItem?.tipe_asuransi_kendaraan}
+            </div>
+            <div>
+              <span className="font-semibold">Onloan/Prepaid</span>
+              <br />
+              {selectedItem?.asuransi_kendaraan_prepaid_onloan}
+            </div>
+            <div>
+              <span className="font-semibold">Bundle RFE</span>
+              <br />
+              {selectedItem?.is_rfe ? "Yes" : "No"}
+            </div>
+            <div>
+              <span className="font-semibold">TS</span>
+              <br />
+              {selectedItem?.is_ts ? "Yes" : "No"}
+            </div>
+            <div>
+              <span className="font-semibold">PA Driver</span>
+              <br />
+              {selectedItem?.is_padriver ? "Yes" : "No"}
+            </div>
+            <div>
+              <span className="font-semibold">PAI</span>
+              <br />
+              {selectedItem?.is_pai ? "Yes" : "No"}
+            </div>
+            <div>
+              <span className="font-semibold">PA Passenger</span>
+              <br />
+              {selectedItem?.pa_passenger}
+            </div>
+            <div>
+              <span className="font-semibold">Depreciation Type</span>
+              <br />
+              {selectedItem?.tipe_depresiasi}
+            </div>
+            <div>
+              <span className="font-semibold">TJH Amount</span>
+              <br />
+              {selectedItem?.tjh_amount}
+            </div>
+            <div>
+              <span className="font-semibold">Coverage PA Amount</span>
+              <br />
+              {selectedItem?.coverage_pa}
+            </div>
+          </div>
+
+          {/* Life Insurance */}
+          <div className="text-sm">
+            <span className="font-bold flex items-center gap-2">
+              <HeartPulse size={16} />
+              Life Insurance Information
+            </span>
+          </div>
+          <div className="py-4 grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <span className="font-semibold">Life Insurance</span>
+              <br />
+              {selectedItem?.asuransi_jiwa}
+            </div>
+            <div>
+              <span className="font-semibold">Onloan/Prepaid</span>
+              <br />
+              {selectedItem?.asuransi_jiwa_prepaid_onloan}
+            </div>
+            <div>
+              <span className="font-semibold">Life Insurance Insured</span>
+              <br />
+              {selectedItem?.asuransi_jiwa_tertanggung}
+            </div>
+            <div>
+              <span className="font-semibold">Affinity Amount</span>
+              <br />
+              {selectedItem?.nilai_affinity}
+            </div>
+            <div>
+              <span className="font-semibold">GHT Amount</span>
+              <br />
+              {selectedItem?.nilai_ght}
+            </div>
+          </div>
+
+          {/* Calculation */}
+          <div className="text-sm">
+            <span className="font-bold flex items-center gap-2">
+              <Calculator size={16} />
+              Calculation Information
+            </span>
+          </div>
+          <div className="py-4 grid grid-cols-2 gap-4 text-xs">
             {selectedItem?.tenor && (
               <div>
                 <span className="font-semibold">Tenor</span>
@@ -393,6 +570,92 @@ export default function ReportTab({
                 {selectedItem.tenor}
               </div>
             )}
+            {selectedItem?.tipe_angsuran && (
+              <div>
+                <span className="font-semibold">Installment Type</span>
+                <br />
+                {selectedItem.tipe_angsuran}
+              </div>
+            )}
+            <div>
+              <span className="font-semibold">OTR</span>
+              <br />
+              {selectedItem?.otr}
+            </div>
+            <div>
+              <span className="font-semibold">% DP</span>
+              <br />
+              {selectedItem?.percent_dp}
+            </div>
+            <div>
+              <span className="font-semibold">DP</span>
+              <br />
+              {selectedItem?.dp}
+            </div>
+            {selectedItem?.percent_selling_rate_final && (
+              <div>
+                <span className="font-semibold">% Selling Rate Final</span>
+                <br />
+                {selectedItem?.percent_selling_rate_final}
+              </div>
+            )}
+            {selectedItem?.percent_effective_selling_rate_final && (
+              <div>
+                <span className="font-semibold">% Eff. Selling Rate Final</span>
+                <br />
+                {selectedItem?.percent_effective_selling_rate_final}
+              </div>
+            )}
+            {selectedItem?.gross_yield && (
+              <div>
+                <span className="font-semibold">% Gross Yield</span>
+                <br />
+                {selectedItem?.gross_yield}
+              </div>
+            )}
+            {selectedItem?.percent_min_selling_rate && (
+              <div>
+                <span className="font-semibold">% Minimum Selling Rate</span>
+                <br />
+                {selectedItem?.percent_min_selling_rate}
+              </div>
+            )}
+            {selectedItem?.percent_selling_rate && (
+              <div>
+                <span className="font-semibold">% Selling Rate</span>
+                <br />
+                {selectedItem?.percent_selling_rate}
+              </div>
+            )}
+            {selectedItem?.percent_base_rate && (
+              <div>
+                <span className="font-semibold">% Base Rate</span>
+                <br />
+                {selectedItem?.percent_base_rate}
+              </div>
+            )}
+            {selectedItem?.percent_selling_rate_efektif && (
+              <div>
+                <span className="font-semibold">% Eff. Selling Rate</span>
+                <br />
+                {selectedItem?.percent_selling_rate_efektif}
+              </div>
+            )}
+          </div>
+
+          {/* Confins */}
+          <div className="text-sm">
+            <span className="font-bold flex items-center gap-2">
+              <Cross size={16} />
+              Confins Information
+            </span>
+          </div>
+          <div className="py-4 grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <span className="font-semibold">Confins Paket</span>
+              <br />
+              {selectedItem?.paket_confins_name}
+            </div>
           </div>
 
           {/* Actions */}
@@ -412,10 +675,10 @@ export default function ReportTab({
             {/* Close */}
             <button
               type="button"
-              className="btn btn-ghost btn-sm"
+              className="btn btn-soft btn-sm btn-neutral"
               onClick={closePreview}
             >
-              <X size={20} />
+              <X size={16} />
               Close
             </button>
           </div>
