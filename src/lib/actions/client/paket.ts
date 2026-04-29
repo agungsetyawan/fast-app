@@ -11,23 +11,31 @@ import {
   PaketTenorSchema,
 } from "@/lib/types/paket";
 
-export async function getPaketByBranch(branchId: string): Promise<Paket[]> {
+export async function getPaket(
+  branchId: string,
+  dealerId: string,
+  vehicleModelId: string,
+): Promise<Paket[]> {
   const supabase = createClient();
   const { data: pakets, error } = await supabase
-    .from("paket_branch_setting")
-    .select("id, branch_id, paket_id, is_enable, paket(*)")
-    .eq("branch_id", branchId)
-    .is("is_enable", true);
-  // .is("paket(is_enable)", true);
-  // .order("paket(paket_name)", { ascending: true });
+    .from("paket")
+    .select(`
+    *,
+    paket_rule_branch!inner(branch_id),
+    paket_rule_dealer!inner(dealer_id),
+    paket_rule_jenis_kendaraan!inner(jenis_kendaraan_id)
+  `)
+    .eq("paket_rule_branch.branch_id", branchId)
+    .eq("paket_rule_dealer.dealer_id", dealerId)
+    .eq("paket_rule_jenis_kendaraan.jenis_kendaraan_id", vehicleModelId)
+    .is("is_enable", true)
+    .order("paket_name", { ascending: true });
 
   if (error) throw new Error(`Fetch paket failed: ${error.message}`);
 
   return z
     .array(PaketSchema)
-    .parse(
-      pakets.map((item) => ({ ...item.paket, name: item.paket.paket_name })),
-    );
+    .parse(pakets.map((item) => ({ ...item, name: item.paket_name })));
 }
 
 export async function getPaketDp(paketId: string): Promise<PaketDp[]> {

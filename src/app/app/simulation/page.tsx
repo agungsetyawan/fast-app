@@ -1,10 +1,10 @@
 "use client";
 
 import type { ChangeEvent } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAreaBranchGrouping } from "@/hooks/useArea";
 import { useDealer } from "@/hooks/useDealer";
-import { usePaket, usePaketTenor } from "@/hooks/usePaket";
+import { usePaket, usePaketDp } from "@/hooks/usePaket";
 import { useParamSetting } from "@/hooks/useParamSetting";
 import { useUser } from "@/hooks/useUser";
 import {
@@ -64,61 +64,113 @@ function SimulationSelect({
   );
 }
 
-export default function Page() {
-  const [dealerId, setDealerId] = useState<string>("");
-  const [vehicleBrandId, setVehicleBrandId] = useState<string>("");
-  const [vehicleModelId, setVehicleModelId] = useState<string>("");
-  const [vehicleTypeId, setVehicleTypeId] = useState<string>("");
-  const [paketId, setPaketId] = useState<string>("");
-  const [paketTenorId, setPaketTenorId] = useState<string>("");
-  const [tipeAngsuran, setTipeAngsuran] = useState<string>("");
-  const [jenisCustomer, setJenisCustomer] = useState<string>("");
-  const [jenisPenggunaan, setJenisPenggunaan] = useState<string>("");
-  const [vehicleInsuranceId, setVehicleInsuranceId] = useState<string>("");
-  const [jenisAsuransi, setJenisAsuransi] = useState<string>("");
-  const [prepaidOnloan, setPrepaidOnloan] = useState<string>("");
+const DEFAULT_PREDEFINE = {
+  vehicleBrandId: "2ee50e7c-d428-47e2-82ce-975de8d3fe69",
+  tipeAngsuran: "ADDM",
+  tenor: "60",
+  tipePembiayaan: "Konvensional",
+  jenisPenggunaan: "Pribadi",
+  jenisAsuransi: "Full Compre",
+  prepaidOnloan: "Full Onloan",
+  tjh: "10000000",
+  paCoverage: "50000000",
+  tipeDepresiasi: "Normal",
+} as const;
 
+export default function Page() {
+  // Param Setting
+  const { data: paramSetting, isLoading: isLoadingParamSetting } =
+    useParamSetting();
+
+  // User Sales
   const { data: user } = useUser();
   const branchId = user?.branch_id ?? "";
 
+  // Dealer
   const { data: dealer, isLoading: isLoadingDealer } = useDealer(branchId);
-  const { data: vehicleBrand, isLoading: isLoadingVehicleBrand } =
-    useVehicleBrand();
-  const { data: vehicleModel, isLoading: isLoadingVehicleModel } =
-    useVehicleModel(vehicleBrandId);
-  const { data: vehicleType, isLoading: isLoadingVehicleType } =
-    useVehicleType(vehicleModelId);
-  const { data: paket, isLoading: isLoadingPaket } = usePaket(branchId);
-  const { data: tenor, isLoading: isLoadingPaketTenor } =
-    usePaketTenor(paketId);
-  const { data: paramSetting, isLoading: isLoadingParamSetting } =
-    useParamSetting();
-  const { data: areaBranchGrouping } = useAreaBranchGrouping(branchId);
-  const { data: vehicleInsurance, isLoading: isLoadingVehicleInsurance } =
-    useVehicleInsurance(dealerId, vehicleModelId);
-
+  const [dealerId, setDealerId] = useState<string>("");
   const handleDealerChange = (value: string) => {
     setDealerId(value);
-    setVehicleBrandId("");
+    setVehicleBrandId(DEFAULT_PREDEFINE.vehicleBrandId);
     setVehicleModelId("");
     setVehicleTypeId("");
     setVehicleInsuranceId("");
   };
 
+  // Vehicle Brand
+  const { data: vehicleBrand, isLoading: isLoadingVehicleBrand } =
+    useVehicleBrand();
+  const [vehicleBrandId, setVehicleBrandId] = useState<string>(
+    DEFAULT_PREDEFINE.vehicleBrandId,
+  );
   const handleVehicleBrandChange = (value: string) => {
     setVehicleBrandId(value);
     setVehicleModelId("");
     setVehicleTypeId("");
   };
 
+  // Vehicle Model
+  const { data: vehicleModel, isLoading: isLoadingVehicleModel } =
+    useVehicleModel(vehicleBrandId);
+  const [vehicleModelId, setVehicleModelId] = useState<string>("");
   const handleVehicleModelChange = (value: string) => {
     setVehicleModelId(value);
     setVehicleTypeId("");
     setVehicleInsuranceId("");
   };
 
+  // Vehicle Type
+  const { data: vehicleType, isLoading: isLoadingVehicleType } =
+    useVehicleType(vehicleModelId);
+  const [vehicleTypeId, setVehicleTypeId] = useState<string>("");
+
+  // Paket
+  const { data: paket, isLoading: isLoadingPaket } = usePaket(
+    branchId,
+    dealerId,
+    vehicleModelId,
+  );
+  const [paketId, setPaketId] = useState<string>("");
+
+  // Paket DP
+  const { data: paketDp, isLoading: isLoadingPaketDp } = usePaketDp(paketId);
+  const minDp = paketDp?.[0]?.percent_dp ?? 0;
+
+  const [tipeAngsuran, setTipeAngsuran] = useState<string>(
+    DEFAULT_PREDEFINE.tipeAngsuran,
+  );
+  const [tenor, setTenor] = useState<string>(DEFAULT_PREDEFINE.tenor);
+  const [tipePembiayaan, setTipePembiayaan] = useState<string>(
+    DEFAULT_PREDEFINE.tipePembiayaan,
+  );
+  const [jenisPenggunaan, setJenisPenggunaan] = useState<string>(
+    DEFAULT_PREDEFINE.jenisPenggunaan,
+  );
+
+  const { data: areaBranchGrouping } = useAreaBranchGrouping(branchId);
+
+  const { data: vehicleInsurance, isLoading: isLoadingVehicleInsurance } =
+    useVehicleInsurance(dealerId, vehicleModelId);
+  const [vehicleInsuranceId, setVehicleInsuranceId] = useState<string>("");
   const selectedVehicleInsurance = vehicleInsurance?.find(
     (item) => item.id === vehicleInsuranceId,
+  );
+  const [jenisAsuransi, setJenisAsuransi] = useState<string>(
+    DEFAULT_PREDEFINE.jenisAsuransi,
+  );
+  const [prepaidOnloan, setPrepaidOnloan] = useState<string>(
+    DEFAULT_PREDEFINE.prepaidOnloan,
+  );
+  const [tipeDepresiasi, setTipeDepresiasi] = useState<string>(
+    DEFAULT_PREDEFINE.tipeDepresiasi,
+  );
+  const [paPassenger, setPaPassenger] = useState<string>("");
+  useEffect(() => {
+    setPaPassenger(selectedVehicleInsurance?.pa_passenger?.toString() ?? "");
+  }, [selectedVehicleInsurance]);
+  const [tjh, setTjh] = useState<string>(DEFAULT_PREDEFINE.tjh);
+  const [paCoverage, setPaCoverage] = useState<string>(
+    DEFAULT_PREDEFINE.paCoverage,
   );
 
   return (
@@ -161,7 +213,6 @@ export default function Page() {
               value={vehicleBrandId}
               placeholder="Select Brand"
               loading={isLoadingVehicleBrand}
-              disabled={!dealerId}
               onChange={handleVehicleBrandChange}
               options={vehicleBrand?.map((item) => ({
                 id: item.id,
@@ -203,7 +254,7 @@ export default function Page() {
               value={paketId}
               placeholder="Select Paket"
               loading={isLoadingPaket}
-              disabled={!branchId}
+              disabled={!branchId || !dealerId || !vehicleModelId}
               onChange={setPaketId}
               options={paket?.map((item) => ({
                 id: item.id,
@@ -220,7 +271,7 @@ export default function Page() {
                   type="number"
                   className="input grow validator appearance-none"
                   required
-                  placeholder="100000000"
+                  placeholder="OTR Price"
                   min={1}
                   inputMode="numeric"
                 />
@@ -236,14 +287,15 @@ export default function Page() {
                   type="number"
                   className="input grow validator appearance-none"
                   required
-                  placeholder="30"
-                  min={0}
+                  placeholder={`DP Percent (${minDp}%)`}
+                  min={minDp}
                   max={100}
                   inputMode="decimal"
+                  disabled={!paketId}
                 />
                 %
               </label>
-              {/* <p className="validator-hint">DP wajib lebih dari 0</p> */}
+              {!isLoadingPaketDp && paketId && <p>Minimum DP {minDp} %</p>}
             </fieldset>
 
             <SimulationSelect
@@ -264,34 +316,28 @@ export default function Page() {
             <SimulationSelect
               label="Tenor"
               name="tenor"
-              value={paketTenorId}
+              value={tenor}
               placeholder="Select Tenor"
-              loading={isLoadingPaketTenor}
-              onChange={setPaketTenorId}
-              options={tenor?.map((item) => ({
-                id: item.tenor.toString(),
-                label: `${item.tenor} Bulan`,
-              }))}
+              loading={isLoadingParamSetting}
+              onChange={setTenor}
+              options={paramSetting
+                ?.filter((item) => item.param_name === "tenor")
+                ?.sort((a, b) => Number(a.param_value) - Number(b.param_value))
+                .map((item) => ({
+                  id: item.param_value,
+                  label: `${item.param_value} Bulan`,
+                }))}
             />
 
-            <div className="divider">
-              <div className="font-bold">Customer</div>
-            </div>
-
-            <label className="input w-full">
-              <span className="label">Customer Name</span>
-              <input type="text" name="customer_name" defaultValue={""} />
-            </label>
-
             <SimulationSelect
-              label="Jenis Customer"
-              name="jenis_customer"
-              value={jenisCustomer}
-              placeholder="Select Jenis Customer"
+              label="Tipe Pembiayaan"
+              name="tipe_pembiayaan"
+              value={tipePembiayaan}
+              placeholder="Select Tipe Pembiayaan"
               loading={isLoadingParamSetting}
-              onChange={setJenisCustomer}
+              onChange={setTipePembiayaan}
               options={paramSetting
-                ?.filter((item) => item.param_name === "jenis_customer")
+                ?.filter((item) => item.param_name === "tipe_pembiayaan")
                 .map((item) => ({
                   id: item.param_value,
                   label: item.param_value,
@@ -371,74 +417,135 @@ export default function Page() {
                 }))}
             />
 
-            <div className="flex flex-row flex-wrap gap-2">
-              <label className="label">
-                <input
-                  key={selectedVehicleInsurance?.id}
-                  type="checkbox"
-                  name="is_bundlerfe"
-                  disabled={!vehicleInsuranceId}
-                  defaultChecked={selectedVehicleInsurance?.is_bundlerfe}
-                  className="toggle"
-                />
-                Bundle RFE
-              </label>
+            <SimulationSelect
+              label="Tipe Depresiasi"
+              name="tipe_depresiasi"
+              value={tipeDepresiasi}
+              placeholder="Select Tipe Depresiasi"
+              loading={isLoadingParamSetting}
+              onChange={setTipeDepresiasi}
+              options={paramSetting
+                ?.filter((item) => item.param_name === "tipe_depresiasi")
+                .map((item) => ({
+                  id: item.param_value,
+                  label: item.param_value,
+                }))}
+            />
 
-              <label className="label">
-                <input
-                  key={selectedVehicleInsurance?.id}
-                  type="checkbox"
-                  name="is_ts"
-                  disabled={!vehicleInsuranceId}
-                  defaultChecked={selectedVehicleInsurance?.is_ts}
-                  className="toggle"
-                />
-                TS
-              </label>
+            <details className="collapse collapse-arrow bg-base-100 border border-base-300">
+              <summary className="collapse-title font-semibold text-sm">
+                Extended Coverage
+              </summary>
+              <div className="collapse-content text-sm flex flex-col gap-2">
+                <div className="flex flex-row flex-wrap gap-2">
+                  <label className="label">
+                    <input
+                      key={selectedVehicleInsurance?.id}
+                      type="checkbox"
+                      name="is_bundlerfe"
+                      disabled={!vehicleInsuranceId}
+                      defaultChecked={selectedVehicleInsurance?.is_bundlerfe}
+                      className="toggle"
+                    />
+                    Bundle RFE
+                  </label>
 
-              <label className="label">
-                <input
-                  key={selectedVehicleInsurance?.id}
-                  type="checkbox"
-                  name="is_padriver"
-                  disabled={!vehicleInsuranceId}
-                  defaultChecked={selectedVehicleInsurance?.is_padriver}
-                  className="toggle"
-                />
-                PA Driver
-              </label>
+                  <label className="label">
+                    <input
+                      key={selectedVehicleInsurance?.id}
+                      type="checkbox"
+                      name="is_ts"
+                      disabled={!vehicleInsuranceId}
+                      defaultChecked={selectedVehicleInsurance?.is_ts}
+                      className="toggle"
+                    />
+                    TS{" "}
+                  </label>
 
-              <label className="label">
-                <input
-                  key={selectedVehicleInsurance?.id}
-                  type="checkbox"
-                  name="is_pai"
-                  disabled={!vehicleInsuranceId}
-                  defaultChecked={selectedVehicleInsurance?.is_pai}
-                  className="toggle"
-                />
-                PAI
-              </label>
-            </div>
+                  <label className="label">
+                    <input
+                      key={selectedVehicleInsurance?.id}
+                      type="checkbox"
+                      name="is_padriver"
+                      disabled={!vehicleInsuranceId}
+                      defaultChecked={selectedVehicleInsurance?.is_padriver}
+                      className="toggle"
+                    />
+                    PA Driver
+                  </label>
 
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">PA Passenger</legend>
-              <label className="input w-full">
-                <input
+                  <label className="label">
+                    <input
+                      key={selectedVehicleInsurance?.id}
+                      type="checkbox"
+                      name="is_pai"
+                      disabled={!vehicleInsuranceId}
+                      defaultChecked={selectedVehicleInsurance?.is_pai}
+                      className="toggle"
+                    />
+                    PAI
+                  </label>
+                </div>
+
+                <SimulationSelect
+                  key={selectedVehicleInsurance?.id}
+                  label="PA Passenger"
                   name="pa_passenger"
-                  type="number"
-                  className="input grow validator appearance-none"
-                  required
+                  value={paPassenger}
+                  placeholder="Select PA Passenger"
+                  loading={isLoadingParamSetting}
                   disabled={!vehicleInsuranceId}
-                  defaultValue={selectedVehicleInsurance?.pa_passenger}
-                  min={1}
-                  max={10}
-                  inputMode="decimal"
+                  onChange={setPaPassenger}
+                  options={paramSetting
+                    ?.filter((item) => item.param_name === "param_pa_passenger")
+                    ?.sort(
+                      (a, b) => Number(a.param_value) - Number(b.param_value),
+                    )
+                    .map((item) => ({
+                      id: item.param_value,
+                      label: `${item.param_value} pax`,
+                    }))}
                 />
-                pax
-              </label>
-              {/* <p className="validator-hint">PA Passenger wajib antara 1-10 orang</p> */}
-            </fieldset>
+
+                <SimulationSelect
+                  label="TJH"
+                  name="tjh"
+                  value={tjh}
+                  placeholder="Select TJH"
+                  loading={isLoadingParamSetting}
+                  disabled={!vehicleInsuranceId}
+                  onChange={setTjh}
+                  options={paramSetting
+                    ?.filter((item) => item.param_name === "param_tjh")
+                    ?.sort(
+                      (a, b) => Number(a.param_value) - Number(b.param_value),
+                    )
+                    .map((item) => ({
+                      id: item.param_value,
+                      label: item.param_value,
+                    }))}
+                />
+
+                <SimulationSelect
+                  label="PA Coverage"
+                  name="pa_coverage"
+                  value={paCoverage}
+                  placeholder="Select PA Coverage"
+                  loading={isLoadingParamSetting}
+                  disabled={!vehicleInsuranceId}
+                  onChange={setPaCoverage}
+                  options={paramSetting
+                    ?.filter((item) => item.param_name === "param_pa_coverage")
+                    ?.sort(
+                      (a, b) => Number(a.param_value) - Number(b.param_value),
+                    )
+                    .map((item) => ({
+                      id: item.param_value,
+                      label: item.param_value,
+                    }))}
+                />
+              </div>
+            </details>
           </form>
         </div>
       </div>

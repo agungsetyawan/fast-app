@@ -1,17 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  getPaketByBranch,
+  getPaket,
   getPaketDp,
   getPaketTenor,
 } from "@/lib/actions/client/paket";
 import { queryKeys } from "@/lib/query/keys";
 import type { Paket, PaketDp, PaketTenor } from "@/lib/types/paket";
 
-export function usePaket(branchId: string) {
+export function usePaket(
+  branchId: string,
+  dealerId: string,
+  vehicleModelId: string,
+) {
   return useQuery<Paket[]>({
-    queryKey: queryKeys.paketByBranch(branchId),
-    queryFn: () => getPaketByBranch(branchId),
-    enabled: !!branchId,
+    queryKey: queryKeys.paket(branchId, dealerId, vehicleModelId),
+    queryFn: () => getPaket(branchId, dealerId, vehicleModelId),
+    enabled: !!branchId && !!dealerId && !!vehicleModelId,
   });
 }
 
