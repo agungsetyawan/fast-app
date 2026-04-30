@@ -7,19 +7,19 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useAreaBranchGrouping } from "@/hooks/useArea";
-import { useDealer } from "@/hooks/useDealer";
-import { useOtherFee } from "@/hooks/useFee";
-import { useLifeInsurance } from "@/hooks/useLifeInsurance";
-import { usePaket, usePaketDetail, usePaketDp } from "@/hooks/usePaket";
-import { useParamSetting } from "@/hooks/useParamSetting";
-import { useUser } from "@/hooks/useUser";
+import { useAreaBranchGrouping } from "@/hooks/queries/useArea";
+import { useDealer } from "@/hooks/queries/useDealer";
+import { useOtherFee } from "@/hooks/queries/useFee";
+import { useLifeInsurance } from "@/hooks/queries/useLifeInsurance";
+import { usePaket, usePaketDetail, usePaketDp } from "@/hooks/queries/usePaket";
+import { useParamSetting } from "@/hooks/queries/useParamSetting";
+import { useUser } from "@/hooks/queries/useUser";
 import {
   useVehicleBrand,
   useVehicleModel,
   useVehicleType,
-} from "@/hooks/useVehicle";
-import { useVehicleInsurance } from "@/hooks/useVehicleInsurance";
+} from "@/hooks/queries/useVehicle";
+import { useVehicleInsurance } from "@/hooks/queries/useVehicleInsurance";
 import { parseSimulationForm } from "../lib/parse-simulation-form";
 
 type SelectOption = {
@@ -959,7 +959,7 @@ export function SimulationForm() {
               className="btn btn-primary sticky bottom-16"
               disabled={isCalculating}
             >
-              Submit
+              Calculate
             </button>
           </form>
         </div>

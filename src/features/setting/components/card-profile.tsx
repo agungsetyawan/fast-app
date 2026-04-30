@@ -6,9 +6,9 @@ import { useEffect, useRef, useState } from "react";
 import { AppIcon } from "@/components/app-icon";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { useUser } from "@/hooks/queries/useUser";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useSync } from "@/hooks/useSync";
-import { useUser } from "@/hooks/useUser";
 import EditProfileModal from "./edit-profile-modal";
 
 export default function CardProfile() {
