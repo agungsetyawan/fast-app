@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { PaketSchema } from "./paket";
 
 export const LifeInsuranceSchema = z.object({
   id: z.uuid(),
@@ -16,12 +15,4 @@ export const LifeInsuranceSchema = z.object({
   ),
 });
 
-export const LifeInsurancePaketSchema = z.object({
-  id: z.uuid(),
-  is_enable: z.boolean(),
-  life_insurance: LifeInsuranceSchema,
-  paket: PaketSchema,
-});
-
 export type LifeInsurance = z.infer<typeof LifeInsuranceSchema>;
-export type LifeInsurancePaket = z.infer<typeof LifeInsurancePaketSchema>;

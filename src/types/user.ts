@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Constants } from "@/types/database.types";
 
 export const UserSchema = z.object({
   id: z.uuid(),
@@ -8,7 +9,7 @@ export const UserSchema = z.object({
     .nullish()
     .transform((val) => val ?? ""),
   role: z
-    .enum(["super_admin", "admin", "user"])
+    .enum(Constants.public.Enums.user_role)
     .nullish()
     .transform((val) => val ?? "user"),
   device_id: z

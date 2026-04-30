@@ -9,8 +9,6 @@ import {
   type PaketDp,
   PaketDpSchema,
   PaketSchema,
-  type PaketTenor,
-  PaketTenorSchema,
 } from "@/types/paket";
 
 export async function getPaket(
@@ -52,20 +50,6 @@ export async function getPaketDp(paketId: string): Promise<PaketDp[]> {
   if (error) throw new Error(`Fetch paket dp failed: ${error.message}`);
 
   return z.array(PaketDpSchema).parse(paketDp);
-}
-
-export async function getPaketTenor(paketId: string): Promise<PaketTenor[]> {
-  const supabase = createClient();
-  const { data: paketTenor, error } = await supabase
-    .from("paket_tenor_setting")
-    .select("id, paket_id, tenor, percent_dic, percent_provisi, is_enable")
-    .eq("paket_id", paketId)
-    .is("is_enable", true)
-    .order("tenor", { ascending: true });
-
-  if (error) throw new Error(`Fetch paket tenor failed: ${error.message}`);
-
-  return z.array(PaketTenorSchema).parse(paketTenor);
 }
 
 export async function getPaketDetail(
