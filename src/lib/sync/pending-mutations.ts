@@ -1,7 +1,7 @@
 import { toast } from "sonner";
-import { syncPendingNameUpdate } from "@/lib/actions/client/profile";
 import { queryClient } from "@/lib/query/client";
 import { queryKeys } from "@/lib/query/keys";
+import { syncPendingNameUpdate } from "@/services/profile";
 
 type PendingSyncTask = {
   sync: () => Promise<boolean>;

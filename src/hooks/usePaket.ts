@@ -1,17 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query/keys";
 import {
   getPaket,
   getPaketDetail,
   getPaketDp,
   getPaketTenor,
-} from "@/lib/actions/client/paket";
-import { queryKeys } from "@/lib/query/keys";
-import type {
-  Paket,
-  PaketDetail,
-  PaketDp,
-  PaketTenor,
-} from "@/lib/types/paket";
+} from "@/services/paket";
+import type { Paket, PaketDetail, PaketDp, PaketTenor } from "@/types/paket";
 
 export function usePaket(
   branchId: string,

@@ -1,12 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  getUser,
-  updateUserAvatar,
-  updateUserName,
-} from "@/lib/actions/client/profile";
 import { mutationKeys, queryKeys } from "@/lib/query/keys";
-import type { User } from "@/lib/types/user";
+import { getUser, updateUserAvatar, updateUserName } from "@/services/profile";
+import type { User } from "@/types/user";
 
 export function useUser() {
   return useQuery<User>({

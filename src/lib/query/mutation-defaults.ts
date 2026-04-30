@@ -1,7 +1,7 @@
 import { toast } from "sonner";
-import { updateUserName } from "@/lib/actions/client/profile";
 import { queryClient } from "@/lib/query/client";
 import { mutationKeys, queryKeys } from "@/lib/query/keys";
+import { updateUserName } from "@/services/profile";
 
 let isMutationDefaultsRegistered = false;
 

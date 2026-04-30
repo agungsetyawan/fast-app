@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAreaBranchGrouping } from "@/lib/actions/client/area";
 import { queryKeys } from "@/lib/query/keys";
-import type { AreaBranchGrouping } from "@/lib/types/area";
+import { getAreaBranchGrouping } from "@/services/area";
+import type { AreaBranchGrouping } from "@/types/area";
 
 export function useAreaBranchGrouping(branchId: string) {
   return useQuery<AreaBranchGrouping>({

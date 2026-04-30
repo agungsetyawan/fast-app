@@ -1,15 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query/keys";
 import {
   getVehicleBrand,
   getVehicleModelByBrand,
   getVehicleTypeByModel,
-} from "@/lib/actions/client/vehicle";
-import { queryKeys } from "@/lib/query/keys";
-import type {
-  VehicleBrand,
-  VehicleModel,
-  VehicleType,
-} from "@/lib/types/vehicle";
+} from "@/services/vehicle";
+import type { VehicleBrand, VehicleModel, VehicleType } from "@/types/vehicle";
 
 export function useVehicleBrand() {
   return useQuery<VehicleBrand[]>({

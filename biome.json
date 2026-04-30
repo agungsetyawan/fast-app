@@ -13,7 +13,7 @@
       "!.next",
       "!dist",
       "!build",
-      "!src/lib/types/database.types.ts"
+      "!src/types/database.types.ts"
     ]
   },
   "formatter": {

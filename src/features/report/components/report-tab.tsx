@@ -1,0 +1,701 @@
+"use client";
+
+import {
+  Banknote,
+  Calculator,
+  ChevronDown,
+  ChevronUp,
+  Cross,
+  Download,
+  Eye,
+  File,
+  HeartPulse,
+  Van,
+  X,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { Database } from "@/types/database.types";
+
+// type DataType = {
+//   id: string | null;
+//   paket_name: string | null;
+//   area: string | null;
+//   branch: string | null;
+//   customer_name: string | null;
+//   model_kendaraan: string | null;
+//   jenis_kendaraan: string | null;
+//   merk_kendaraan: string | null;
+//   tenor?: number | null;
+//   dealer?: string | null;
+//   tipe_perhitungan: string | null;
+//   tipe_pembiayaan?: string | null;
+//   jenis_penggunaan?: string | null;
+//   paket_confins_name?: string | null;
+//   // asuransi kendaraan
+//   asuransi_kendaraan?: string | null;
+//   tipe_asuransi_kendaraan?: string | null;
+//   asuransi_kendaraan_prepaid_onloan?: string | null;
+//   is_rfe?: boolean | null;
+//   is_ts?: boolean | null;
+//   is_padriver?: boolean | null;
+//   is_pai?: boolean | null;
+//   pa_passenger?: number | null;
+//   tjh_amount?: number | null;
+//   coverage_pa?: number | null;
+//   tipe_depresiasi?: string | null;
+//   // asuransi jiwa
+//   asuransi_jiwa?: string | null;
+//   asuransi_jiwa_prepaid_onloan?: string | null;
+//   asuransi_jiwa_tertanggung?: number | null;
+//   nilai_affinity?: number | null;
+//   nilai_ght?: number | null;
+//   // calculation
+//   otr: number | null;
+//   percent_dp: number | null;
+//   dp: number | null;
+//   tipe_angsuran?: string | null;
+//   percent_selling_rate?: number | null;
+//   percent_min_selling_rate?: number | null;
+//   percent_base_rate?: number | null;
+//   percent_selling_rate_efektif?: number | null;
+//   percent_selling_rate_final?: number | null;
+//   percent_effective_selling_rate_final?: number | null;
+//   gross_yield?: number | null;
+// };
+
+type DataType = Partial<
+  Database["public"]["Tables"]["simulasi_budget"]["Row"]
+> &
+  Partial<Database["public"]["Tables"]["simulasi_kredit"]["Row"]>;
+
+type TabKey = "budget" | "credit";
+
+type TabState = {
+  search: string;
+  page: number;
+  sortKey: keyof DataType;
+  sortAsc: boolean;
+};
+
+const ROWS_PER_PAGE = 10;
+
+const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
+  { key: "budget", label: "Simulasi Budget", icon: <Banknote size={16} /> },
+  { key: "credit", label: "Simulasi Credit", icon: <Calculator size={16} /> },
+];
+
+const DEFAULT_TAB_STATE: TabState = {
+  search: "",
+  page: 1,
+  sortKey: "id",
+  sortAsc: true,
+};
+
+export default function ReportTab({
+  simulasiBudget = [],
+  simulasiCredit = [],
+}: {
+  simulasiBudget: DataType[];
+  simulasiCredit: DataType[];
+}) {
+  const modalRef = useRef<HTMLDialogElement>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    };
+  }, [pdfUrl]);
+
+  const generatePDF = async (item: DataType) => {
+    const { default: jsPDF } = await import("jspdf");
+    const doc = new jsPDF();
+    //doc.addImage("/logo.png", "PNG", 150, 10, 40, 15);
+    // ===== Header =====
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("Simulasi Report", 14, 20);
+
+    doc.setFillColor(41, 128, 185);
+    doc.rect(0, 0, 210, 30, "F");
+    doc.setTextColor(255);
+    doc.setTextColor(0);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Generated: ${new Date().toLocaleString("id-ID")}`, 14, 26);
+
+    // Divider
+    doc.setDrawColor(200);
+    doc.line(14, 30, 196, 30);
+
+    // ===== Content Box =====
+    const startY = 40;
+    const lineHeight = 6;
+
+    const rows = [
+      { label: "Id", value: item.id },
+      { label: "Label", value: item.customer_name },
+      { label: "Paket Name", value: item.paket_name },
+      { label: "Area", value: item.area },
+      { label: "Branch", value: item.branch },
+      { label: "Dealer", value: item.dealer },
+      { label: "Model Kendaraan", value: item.model_kendaraan },
+      { label: "Jenis Kendaraan", value: item.jenis_kendaraan },
+    ];
+
+    /*  Only for Credit (example)
+     if ("customer_name" in item) {
+       rows.unshift({ label: "Customer", value: item.customer_name });
+     } */
+
+    // Only for Budget (example)
+    if ("tenor" in item) {
+      rows.push({ label: "Tenor", value: String(item.tenor ?? "-") });
+    }
+
+    // Draw container box
+    doc.setDrawColor(220);
+    doc.roundedRect(12, startY - 8, 186, rows.length * lineHeight + 12, 3, 3);
+
+    rows.forEach((row, index) => {
+      const y = startY + index * lineHeight;
+
+      // Label
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text(row.label, 16, y);
+
+      // Value
+      doc.setFont("helvetica", "normal");
+      doc.text(`: ${row.value}`, 60, y);
+    });
+
+    // ===== Footer =====
+    doc.setFontSize(9);
+    doc.setTextColor(150);
+    doc.text("Generated by Simulation System", 14, 280);
+
+    // ===== Export =====
+    const blob = doc.output("blob");
+    const url = URL.createObjectURL(blob);
+
+    setPdfUrl(url);
+  };
+
+  const closePreview = () => {
+    modalRef.current?.close();
+    setPdfUrl(null);
+  };
+
+  const [activeTab, setActiveTab] = useState<TabKey>("budget");
+  const [tabStates, setTabStates] = useState<Record<TabKey, TabState>>({
+    budget: { ...DEFAULT_TAB_STATE },
+    credit: { ...DEFAULT_TAB_STATE },
+  });
+
+  const { search, page, sortKey, sortAsc } = tabStates[activeTab];
+  const rawData = activeTab === "budget" ? simulasiBudget : simulasiCredit;
+
+  const updateTabState = (patch: Partial<TabState>) => {
+    setTabStates((prev) => ({
+      ...prev,
+      [activeTab]: { ...prev[activeTab], ...patch },
+    }));
+  };
+
+  const handleSearch = (value: string) => {
+    updateTabState({ search: value, page: 1 });
+  };
+
+  const handleSort = (key: keyof DataType) => {
+    updateTabState(
+      key === sortKey
+        ? { sortAsc: !sortAsc }
+        : { sortKey: key, sortAsc: true, page: 1 },
+    );
+  };
+
+  const [selectedItem, setSelectedItem] = useState<DataType | null>(null);
+
+  const handlePreview = async (item: DataType) => {
+    setSelectedItem(item);
+    await generatePDF(item);
+    modalRef.current?.showModal();
+  };
+
+  const processedData = useMemo(() => {
+    const filtered = search
+      ? rawData.filter((item) =>
+          Object.values(item)
+            .join(" ")
+            .toLowerCase()
+            .includes(search.toLowerCase()),
+        )
+      : [...rawData];
+
+    return filtered.sort((a, b) => {
+      const aVal = a[sortKey] ?? "";
+      const bVal = b[sortKey] ?? "";
+
+      if (aVal < bVal) return sortAsc ? -1 : 1;
+      if (aVal > bVal) return sortAsc ? 1 : -1;
+      return 0;
+    });
+  }, [rawData, search, sortKey, sortAsc]);
+
+  const totalPages = Math.ceil(processedData.length / ROWS_PER_PAGE);
+
+  const paginatedData = useMemo(() => {
+    const start = (page - 1) * ROWS_PER_PAGE;
+    return processedData.slice(start, start + ROWS_PER_PAGE);
+  }, [processedData, page]);
+
+  const SortableHeader = ({
+    label,
+    colKey,
+  }: {
+    label: string;
+    colKey: keyof DataType;
+  }) => (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: <>
+    <td
+      onClick={() => handleSort(colKey)}
+      className="cursor-pointer select-none"
+    >
+      {label}{" "}
+      {sortKey === colKey &&
+        (sortAsc ? (
+          <ChevronUp size={16} className="inline-block" />
+        ) : (
+          <ChevronDown size={16} className="inline-block" />
+        ))}
+    </td>
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Tabs — daisyUI tabs-box */}
+      <div
+        role="tablist"
+        className="tabs tabs-box w-full md:w-fit justify-around"
+      >
+        {TABS.map(({ key, label, icon }) => (
+          <button
+            key={key}
+            role="tab"
+            type="button"
+            onClick={() => setActiveTab(key)}
+            className={`tab gap-2 max-sm:w-1/2 font-semibold ${activeTab === key ? "tab-active" : ""}`}
+          >
+            {icon}
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Search */}
+      <input
+        type="text"
+        placeholder={`Search ${activeTab}...`}
+        className="input input-bordered w-full md:max-w-xs"
+        value={search}
+        onChange={(e) => handleSearch(e.target.value)}
+      />
+
+      {/* Table — daisyUI table with border wrapper */}
+      <div className="overflow-auto h-[calc(100vh-385px)] md:h-[calc(100vh-400px)] w-full rounded-box border border-base-content/5 bg-base-100">
+        <table className="table table-pin-rows table-pin-cols">
+          <thead>
+            <tr className="font-bold">
+              <SortableHeader label="Label" colKey="customer_name" />
+              <SortableHeader label="Paket Name" colKey="paket_name" />
+              <SortableHeader label="Branch" colKey="branch" />
+              <SortableHeader label="Dealer" colKey="dealer" />
+              <SortableHeader
+                label="Model Kendaraan"
+                colKey="model_kendaraan"
+              />
+              <SortableHeader
+                label="Jenis Kendaraan"
+                colKey="jenis_kendaraan"
+              />
+              <th className="text-center">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {paginatedData.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text-center text-base-content/50">
+                  No data
+                </td>
+              </tr>
+            ) : (
+              paginatedData.map((item) => (
+                <tr key={item.id} className="hover:bg-base-200 text-xs">
+                  <td>{item.customer_name}</td>
+                  <td>{item.paket_name}</td>
+                  <td>{item.branch}</td>
+                  <td>{item.dealer}</td>
+                  <td>{item.model_kendaraan}</td>
+                  <td>{item.jenis_kendaraan}</td>
+                  <th className="bg-base-100 text-center">
+                    <button
+                      type="button"
+                      onClick={() => handlePreview(item)}
+                      className="btn btn-ghost btn-xs btn-square"
+                    >
+                      <Eye size={16} />
+                    </button>
+                  </th>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-base-content/60">
+          Page {page} of {totalPages || 1}
+        </span>
+
+        <div className="join">
+          <button
+            type="button"
+            className="join-item btn btn-sm"
+            disabled={page === 1}
+            onClick={() => updateTabState({ page: page - 1 })}
+          >
+            «
+          </button>
+          <button type="button" className="join-item btn btn-sm btn-active">
+            {page}
+          </button>
+          <button
+            type="button"
+            className="join-item btn btn-sm"
+            disabled={page >= totalPages}
+            onClick={() => updateTabState({ page: page + 1 })}
+          >
+            »
+          </button>
+        </div>
+      </div>
+
+      {/* Modal */}
+
+      <dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box max-w-2xl">
+          {/* Header */}
+          <h3 className="font-bold text-lg flex items-center gap-2">
+            <Eye size={18} />
+            Detail Preview
+          </h3>
+
+          {/* Content */}
+          <br />
+          <div className="text-sm">
+            <span className="font-bold flex items-center gap-2">
+              <File size={16} />
+              General Information
+            </span>
+          </div>
+          <div className="py-4 grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <span className="font-semibold">Label</span>
+              <br />
+              {selectedItem?.customer_name}
+            </div>
+            <div>
+              <span className="font-semibold">Paket</span>
+              <br />
+              {selectedItem?.paket_name}
+            </div>
+            <div>
+              <span className="font-semibold">Branch</span>
+              <br />
+              {selectedItem?.branch}
+            </div>
+            <div>
+              <span className="font-semibold">Dealer</span>
+              <br />
+              {selectedItem?.dealer}
+            </div>
+            <div>
+              <span className="font-semibold">Vehicle Brand</span>
+              <br />
+              {selectedItem?.merk_kendaraan}
+            </div>
+            <div>
+              <span className="font-semibold">Vehicle Model</span>
+              <br />
+              {selectedItem?.model_kendaraan}
+            </div>
+            <div>
+              <span className="font-semibold">Vehicle Type</span>
+              <br />
+              {selectedItem?.jenis_kendaraan}
+            </div>
+            <div>
+              <span className="font-semibold">Calculation Type</span>
+              <br />
+              {selectedItem?.tipe_perhitungan}
+            </div>
+            <div>
+              <span className="font-semibold">Financing Type</span>
+              <br />
+              {selectedItem?.tipe_pembiayaan}
+            </div>
+            <div>
+              <span className="font-semibold">Usage Type</span>
+              <br />
+              {selectedItem?.jenis_penggunaan}
+            </div>
+          </div>
+
+          {/* Vehicle Insurance */}
+          <div className="text-sm">
+            <span className="font-bold flex items-center gap-2">
+              <Van size={16} />
+              Vehicle Insurance Information
+            </span>
+          </div>
+          <div className="py-4 grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <span className="font-semibold">Vehicle Insurance Area</span>
+              <br />
+              {selectedItem?.area}
+            </div>
+            <div>
+              <span className="font-semibold">Vehicle Insurance</span>
+              <br />
+              {selectedItem?.asuransi_kendaraan}
+            </div>
+            <div>
+              <span className="font-semibold">Vehicle Insurance Type</span>
+              <br />
+              {selectedItem?.tipe_asuransi_kendaraan}
+            </div>
+            <div>
+              <span className="font-semibold">Onloan/Prepaid</span>
+              <br />
+              {selectedItem?.asuransi_kendaraan_prepaid_onloan}
+            </div>
+            <div>
+              <span className="font-semibold">Bundle RFE</span>
+              <br />
+              {selectedItem?.is_rfe ? "Yes" : "No"}
+            </div>
+            <div>
+              <span className="font-semibold">TS</span>
+              <br />
+              {selectedItem?.is_ts ? "Yes" : "No"}
+            </div>
+            <div>
+              <span className="font-semibold">PA Driver</span>
+              <br />
+              {selectedItem?.is_padriver ? "Yes" : "No"}
+            </div>
+            <div>
+              <span className="font-semibold">PAI</span>
+              <br />
+              {selectedItem?.is_pai ? "Yes" : "No"}
+            </div>
+            <div>
+              <span className="font-semibold">PA Passenger</span>
+              <br />
+              {selectedItem?.pa_passenger}
+            </div>
+            <div>
+              <span className="font-semibold">Depreciation Type</span>
+              <br />
+              {selectedItem?.tipe_depresiasi}
+            </div>
+            <div>
+              <span className="font-semibold">TJH Amount</span>
+              <br />
+              {selectedItem?.tjh_amount}
+            </div>
+            <div>
+              <span className="font-semibold">Coverage PA Amount</span>
+              <br />
+              {selectedItem?.coverage_pa}
+            </div>
+          </div>
+
+          {/* Life Insurance */}
+          <div className="text-sm">
+            <span className="font-bold flex items-center gap-2">
+              <HeartPulse size={16} />
+              Life Insurance Information
+            </span>
+          </div>
+          <div className="py-4 grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <span className="font-semibold">Life Insurance</span>
+              <br />
+              {selectedItem?.asuransi_jiwa}
+            </div>
+            <div>
+              <span className="font-semibold">Onloan/Prepaid</span>
+              <br />
+              {selectedItem?.asuransi_jiwa_prepaid_onloan}
+            </div>
+            <div>
+              <span className="font-semibold">Life Insurance Insured</span>
+              <br />
+              {selectedItem?.asuransi_jiwa_tertanggung}
+            </div>
+            <div>
+              <span className="font-semibold">Affinity Amount</span>
+              <br />
+              {selectedItem?.nilai_affinity}
+            </div>
+            <div>
+              <span className="font-semibold">GHT Amount</span>
+              <br />
+              {selectedItem?.nilai_ght}
+            </div>
+          </div>
+
+          {/* Calculation */}
+          <div className="text-sm">
+            <span className="font-bold flex items-center gap-2">
+              <Calculator size={16} />
+              Calculation Information
+            </span>
+          </div>
+          <div className="py-4 grid grid-cols-2 gap-4 text-xs">
+            {selectedItem?.tenor && (
+              <div>
+                <span className="font-semibold">Tenor</span>
+                <br />
+                {selectedItem.tenor}
+              </div>
+            )}
+            {selectedItem?.tipe_angsuran && (
+              <div>
+                <span className="font-semibold">Installment Type</span>
+                <br />
+                {selectedItem.tipe_angsuran}
+              </div>
+            )}
+            <div>
+              <span className="font-semibold">OTR</span>
+              <br />
+              {selectedItem?.otr}
+            </div>
+            <div>
+              <span className="font-semibold">% DP</span>
+              <br />
+              {selectedItem?.percent_dp}
+            </div>
+            <div>
+              <span className="font-semibold">DP</span>
+              <br />
+              {selectedItem?.dp}
+            </div>
+            {selectedItem?.percent_selling_rate_final && (
+              <div>
+                <span className="font-semibold">% Selling Rate Final</span>
+                <br />
+                {selectedItem?.percent_selling_rate_final}
+              </div>
+            )}
+            {selectedItem?.percent_effective_selling_rate_final && (
+              <div>
+                <span className="font-semibold">% Eff. Selling Rate Final</span>
+                <br />
+                {selectedItem?.percent_effective_selling_rate_final}
+              </div>
+            )}
+            {selectedItem?.gross_yield && (
+              <div>
+                <span className="font-semibold">% Gross Yield</span>
+                <br />
+                {selectedItem?.gross_yield}
+              </div>
+            )}
+            {selectedItem?.percent_min_selling_rate && (
+              <div>
+                <span className="font-semibold">% Minimum Selling Rate</span>
+                <br />
+                {selectedItem?.percent_min_selling_rate}
+              </div>
+            )}
+            {selectedItem?.percent_selling_rate && (
+              <div>
+                <span className="font-semibold">% Selling Rate</span>
+                <br />
+                {selectedItem?.percent_selling_rate}
+              </div>
+            )}
+            {selectedItem?.percent_base_rate && (
+              <div>
+                <span className="font-semibold">% Base Rate</span>
+                <br />
+                {selectedItem?.percent_base_rate}
+              </div>
+            )}
+            {selectedItem?.percent_selling_rate_efektif && (
+              <div>
+                <span className="font-semibold">% Eff. Selling Rate</span>
+                <br />
+                {selectedItem?.percent_selling_rate_efektif}
+              </div>
+            )}
+          </div>
+
+          {/* Confins */}
+          <div className="text-sm">
+            <span className="font-bold flex items-center gap-2">
+              <Cross size={16} />
+              Confins Information
+            </span>
+          </div>
+          <div className="py-4 grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <span className="font-semibold">Confins Paket</span>
+              <br />
+              {selectedItem?.paket_confins_name}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="modal-action">
+            {/* Download */}
+            {pdfUrl && (
+              <a
+                href={pdfUrl}
+                download={`simulasi-${selectedItem?.id}.pdf`}
+                className="btn btn-primary btn-sm flex gap-2"
+              >
+                <Download size={16} />
+                Download PDF
+              </a>
+            )}
+
+            {/* Close */}
+            <button
+              type="button"
+              className="btn btn-soft btn-sm btn-neutral"
+              onClick={closePreview}
+            >
+              <X size={16} />
+              Close
+            </button>
+          </div>
+        </div>
+
+        {/* Backdrop */}
+        <form method="dialog" className="modal-backdrop">
+          {/* biome-ignore lint/a11y/useButtonType: <> */}
+          <button>close</button>
+        </form>
+      </dialog>
+    </div>
+  );
+}

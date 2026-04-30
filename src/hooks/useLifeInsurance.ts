@@ -1,13 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query/keys";
 import {
   getLifeInsurance,
   getLifeInsuranceByPaket,
-} from "@/lib/actions/client/life-insurance";
-import { queryKeys } from "@/lib/query/keys";
-import type {
-  LifeInsurance,
-  LifeInsurancePaket,
-} from "@/lib/types/life-insurance";
+} from "@/services/life-insurance";
+import type { LifeInsurance, LifeInsurancePaket } from "@/types/life-insurance";
 
 export function useLifeInsurance(paketId: string) {
   return useQuery<LifeInsurance[]>({

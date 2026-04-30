@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { getOtherFee } from "@/lib/actions/client/fee";
 import { queryKeys } from "@/lib/query/keys";
-import type { OtherFee } from "@/lib/types/fee";
+import { getOtherFee } from "@/services/fee";
+import type { OtherFee } from "@/types/fee";
 
 export function useOtherFee(branchDealerMappingId: string) {
   return useQuery<OtherFee>({

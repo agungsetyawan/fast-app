@@ -1,19 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query/keys";
 import {
   getVehicleInsurance,
   getVehicleInsuranceCoverage,
   getVehicleInsuranceDepreciation,
   getVehicleInsurancePa,
   getVehicleInsuranceTjh,
-} from "@/lib/actions/client/vehicle-insurance";
-import { queryKeys } from "@/lib/query/keys";
+} from "@/services/vehicle-insurance";
 import type {
   VehicleInsurance,
   VehicleInsuranceCoverage,
   VehicleInsuranceDepreciation,
   VehicleInsurancePa,
   VehicleInsuranceTjh,
-} from "@/lib/types/vehicle-insurance";
+} from "@/types/vehicle-insurance";
 
 export function useVehicleInsurance(dealerId: string, vehicleModelId: string) {
   return useQuery<VehicleInsurance[]>({
