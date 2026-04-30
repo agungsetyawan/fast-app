@@ -1,6 +1,12 @@
 "use client";
 
-import { type ChangeEvent, useActionState, useEffect, useState } from "react";
+import {
+  type ChangeEvent,
+  useActionState,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useAreaBranchGrouping } from "@/hooks/useArea";
 import { useDealer } from "@/hooks/useDealer";
 import { useOtherFee } from "@/hooks/useFee";
@@ -29,6 +35,45 @@ type SimulationSelectProps = {
   disabled?: boolean;
   options?: SelectOption[];
   onChange: (value: string) => void;
+};
+
+type SimulationFormValues = {
+  branchName: string;
+  dealerId: string;
+  vehicleBrandId: string;
+  vehicleModelId: string;
+  vehicleTypeId: string;
+  paketId: string;
+  otr: number;
+  dp: number;
+  tipeAngsuran: string;
+  tenor: number;
+  tipePembiayaan: string;
+  jenisPenggunaan: string;
+  areaAsuransiKendaraanName: string;
+  asuransiKendaraan: string;
+  jenisAsuransi: string;
+  prepaidOnloan: string;
+  tipeDepresiasi: string;
+  isBundleRfe: boolean;
+  isTs: boolean;
+  isPadriver: boolean;
+  isPai: boolean;
+  paPassenger: string;
+  tjh: number;
+  paCoverage: number;
+  lifeInsuranceId: string;
+  lifeInsurancePrepaidOnloan: string;
+  isAffinity: boolean;
+  isGht: boolean;
+  jumlahTertanggung: string;
+  rate: number;
+  provisiDic: string;
+  provisi: number | null;
+  dic: number | null;
+  policyFee: number;
+  adminFee: number;
+  otherFee: number;
 };
 
 function SimulationSelect({
@@ -79,10 +124,126 @@ const DEFAULT_PREDEFINE = {
   lifeInsurancePrepaidOnloan: "Onloan",
 } as const;
 
+const PROVISI_DIC_OPTIONS: SelectOption[] = [
+  {
+    id: "provisi",
+    label: "Provisi",
+  },
+  {
+    id: "dic",
+    label: "DIC",
+  },
+];
+
+function getFormString(formData: FormData, name: string) {
+  const value = formData.get(name);
+  return typeof value === "string" ? value : "";
+}
+
+function getFormNumber(formData: FormData, name: string) {
+  const value = Number(getFormString(formData, name));
+  return Number.isFinite(value) ? value : 0;
+}
+
+function getOptionalFormNumber(formData: FormData, name: string) {
+  const value = getFormString(formData, name);
+  if (!value) return null;
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : null;
+}
+
+function parseSimulationForm(formData: FormData): SimulationFormValues {
+  return {
+    branchName: getFormString(formData, "branch_name"),
+    dealerId: getFormString(formData, "dealerId"),
+    vehicleBrandId: getFormString(formData, "vehicleBrandId"),
+    vehicleModelId: getFormString(formData, "vehicleModelId"),
+    vehicleTypeId: getFormString(formData, "vehicleTypeId"),
+    paketId: getFormString(formData, "paketId"),
+    otr: getFormNumber(formData, "otr"),
+    dp: getFormNumber(formData, "dp"),
+    tipeAngsuran: getFormString(formData, "tipe_angsuran"),
+    tenor: getFormNumber(formData, "tenor"),
+    tipePembiayaan: getFormString(formData, "tipe_pembiayaan"),
+    jenisPenggunaan: getFormString(formData, "jenis_penggunaan"),
+    areaAsuransiKendaraanName: getFormString(
+      formData,
+      "area_asuransi_kendaraan_name",
+    ),
+    asuransiKendaraan: getFormString(formData, "asuransi_kendaraan"),
+    jenisAsuransi: getFormString(formData, "jenis_asuransi"),
+    prepaidOnloan: getFormString(formData, "prepaid_onloan"),
+    tipeDepresiasi: getFormString(formData, "tipe_depresiasi"),
+    isBundleRfe: formData.has("is_bundlerfe"),
+    isTs: formData.has("is_ts"),
+    isPadriver: formData.has("is_padriver"),
+    isPai: formData.has("is_pai"),
+    paPassenger: getFormString(formData, "pa_passenger"),
+    tjh: getFormNumber(formData, "tjh"),
+    paCoverage: getFormNumber(formData, "pa_coverage"),
+    lifeInsuranceId: getFormString(formData, "life_insurance_id"),
+    lifeInsurancePrepaidOnloan: getFormString(
+      formData,
+      "life_insurance_prepaid_onloan",
+    ),
+    isAffinity: formData.has("is_affinity"),
+    isGht: formData.has("is_ght"),
+    jumlahTertanggung: getFormString(formData, "jumlah_tertanggung"),
+    rate: getFormNumber(formData, "rate"),
+    provisiDic: getFormString(formData, "provisi_dic"),
+    provisi: getOptionalFormNumber(formData, "provisi"),
+    dic: getOptionalFormNumber(formData, "dic"),
+    policyFee: getFormNumber(formData, "policy_fee"),
+    adminFee: getFormNumber(formData, "admin_fee"),
+    otherFee: getFormNumber(formData, "other_fee"),
+  };
+}
+
 export default function Page() {
   // Param Setting
   const { data: paramSetting, isLoading: isLoadingParamSetting } =
     useParamSetting();
+  const paramOptions = useMemo(() => {
+    const buildOptions = (
+      paramName: string,
+      formatLabel: (value: string) => string = (value) => value,
+      sortNumeric = false,
+    ): SelectOption[] => {
+      const items = paramSetting?.filter(
+        (item) => item.param_name === paramName,
+      );
+      if (!items) return [];
+
+      if (sortNumeric) {
+        items.sort((a, b) => Number(a.param_value) - Number(b.param_value));
+      }
+
+      return items.map((item) => ({
+        id: item.param_value,
+        label: formatLabel(item.param_value),
+      }));
+    };
+
+    return {
+      tipeAngsuran: buildOptions("tipe_angsuran"),
+      tenor: buildOptions("tenor", (value) => `${value} Bulan`, true),
+      tipePembiayaan: buildOptions("tipe_pembiayaan"),
+      jenisPenggunaan: buildOptions("jenis_penggunaan"),
+      jenisAsuransi: buildOptions("jenis_asuransi"),
+      prepaidOnloan: buildOptions("prepaid_onloan"),
+      tipeDepresiasi: buildOptions("tipe_depresiasi"),
+      paPassenger: buildOptions(
+        "param_pa_passenger",
+        (value) => `${value} pax`,
+        true,
+      ),
+      tjh: buildOptions("param_tjh", undefined, true),
+      paCoverage: buildOptions("param_pa_coverage", undefined, true),
+      lifeInsurancePrepaidOnloan: buildOptions(
+        "param_life_insurance_prepaid_onloan",
+      ),
+    };
+  }, [paramSetting]);
 
   // User Sales
   const { data: user } = useUser();
@@ -91,14 +252,10 @@ export default function Page() {
   // Dealer
   const { data: dealer, isLoading: isLoadingDealer } = useDealer(branchId);
   const [dealerId, setDealerId] = useState<string>("");
-  const selectedDealer = dealer?.find((item) => item.id === dealerId);
-  const handleDealerChange = (value: string) => {
-    setDealerId(value);
-    setVehicleBrandId(DEFAULT_PREDEFINE.vehicleBrandId);
-    setVehicleModelId("");
-    setVehicleTypeId("");
-    setVehicleInsuranceId("");
-  };
+  const selectedDealer = useMemo(
+    () => dealer?.find((item) => item.id === dealerId),
+    [dealer, dealerId],
+  );
 
   // Vehicle Brand
   const { data: vehicleBrand, isLoading: isLoadingVehicleBrand } =
@@ -106,21 +263,11 @@ export default function Page() {
   const [vehicleBrandId, setVehicleBrandId] = useState<string>(
     DEFAULT_PREDEFINE.vehicleBrandId,
   );
-  const handleVehicleBrandChange = (value: string) => {
-    setVehicleBrandId(value);
-    setVehicleModelId("");
-    setVehicleTypeId("");
-  };
 
   // Vehicle Model
   const { data: vehicleModel, isLoading: isLoadingVehicleModel } =
     useVehicleModel(vehicleBrandId);
   const [vehicleModelId, setVehicleModelId] = useState<string>("");
-  const handleVehicleModelChange = (value: string) => {
-    setVehicleModelId(value);
-    setVehicleTypeId("");
-    setVehicleInsuranceId("");
-  };
 
   // Vehicle Type
   const { data: vehicleType, isLoading: isLoadingVehicleType } =
@@ -134,7 +281,10 @@ export default function Page() {
     vehicleModelId,
   );
   const [paketId, setPaketId] = useState<string>("");
-  const selectedPaket = paket?.find((item) => item.id === paketId);
+  const selectedPaket = useMemo(
+    () => paket?.find((item) => item.id === paketId),
+    [paket, paketId],
+  );
 
   // Paket DP
   const { data: paketDp, isLoading: isLoadingPaketDp } = usePaketDp(paketId);
@@ -157,21 +307,31 @@ export default function Page() {
 
   // Paket Detail
   const { data: paketDetail } = usePaketDetail(paketId, branchId);
-  const targetDpPercent = paketDp
-    ?.filter((val) => val.percent_dp <= Number(dp ?? 0))
-    .reduce((max, curr) => Math.max(max, curr.percent_dp), 0);
-  const selectedPaketDetail = paketDetail
-    ?.filter((item) => item.percent_dp === targetDpPercent)
-    .map((item) => {
-      const type = item.types.find((t) => t.tipe_angsuran === tipeAngsuran);
-      const detail = type?.details?.find((d) => d.tenor === Number(tenor));
-      return {
-        percent_dp: item.percent_dp,
-        percent_dic: item.percent_dic,
-        percent_provisi: item.percent_provisi,
-        rate: detail?.rate || 0,
-      };
-    })[0];
+  const targetDpPercent = useMemo(
+    () =>
+      paketDp
+        ?.filter((val) => val.percent_dp <= Number(dp || 0))
+        .reduce((max, curr) => Math.max(max, curr.percent_dp), 0),
+    [paketDp, dp],
+  );
+  const selectedPaketDetail = useMemo(() => {
+    const detailByDp = paketDetail?.find(
+      (item) => item.percent_dp === targetDpPercent,
+    );
+    if (!detailByDp) return undefined;
+
+    const type = detailByDp.types.find(
+      (item) => item.tipe_angsuran === tipeAngsuran,
+    );
+    const detail = type?.details?.find((item) => item.tenor === Number(tenor));
+
+    return {
+      percent_dp: detailByDp.percent_dp,
+      percent_dic: detailByDp.percent_dic,
+      percent_provisi: detailByDp.percent_provisi,
+      rate: detail?.rate || 0,
+    };
+  }, [paketDetail, targetDpPercent, tipeAngsuran, tenor]);
   const [rate, setRate] = useState<string>("");
   const [provisi, setProvisi] = useState<string>("");
   const [dic, setDic] = useState<string>("");
@@ -179,7 +339,11 @@ export default function Page() {
     setRate(selectedPaketDetail?.rate?.toString() ?? "0");
     setProvisi(selectedPaketDetail?.percent_provisi?.toString() ?? "0");
     setDic(selectedPaketDetail?.percent_dic?.toString() ?? "0");
-  }, [selectedPaketDetail]);
+  }, [
+    selectedPaketDetail?.rate,
+    selectedPaketDetail?.percent_provisi,
+    selectedPaketDetail?.percent_dic,
+  ]);
 
   // Vehicle Insurance
   const { data: areaBranchGrouping } = useAreaBranchGrouping(branchId);
@@ -187,8 +351,9 @@ export default function Page() {
   const { data: vehicleInsurance, isLoading: isLoadingVehicleInsurance } =
     useVehicleInsurance(dealerId, vehicleModelId);
   const [vehicleInsuranceId, setVehicleInsuranceId] = useState<string>("");
-  const selectedVehicleInsurance = vehicleInsurance?.find(
-    (item) => item.id === vehicleInsuranceId,
+  const selectedVehicleInsurance = useMemo(
+    () => vehicleInsurance?.find((item) => item.id === vehicleInsuranceId),
+    [vehicleInsurance, vehicleInsuranceId],
   );
   const [jenisAsuransi, setJenisAsuransi] = useState<string>(
     DEFAULT_PREDEFINE.jenisAsuransi,
@@ -212,8 +377,9 @@ export default function Page() {
   const { data: lifeInsurance, isLoading: isLoadingLifeInsurance } =
     useLifeInsurance(paketId);
   const [lifeInsuranceId, setLifeInsuranceId] = useState<string>("");
-  const selectedLifeInsurance = lifeInsurance?.find(
-    (item) => item.id === lifeInsuranceId,
+  const selectedLifeInsurance = useMemo(
+    () => lifeInsurance?.find((item) => item.id === lifeInsuranceId),
+    [lifeInsurance, lifeInsuranceId],
   );
   const [lifeInsurancePrepaidOnloan, setLifeInsurancePrepaidOnloan] =
     useState<string>(DEFAULT_PREDEFINE.lifeInsurancePrepaidOnloan);
@@ -232,6 +398,14 @@ export default function Page() {
   const defaultBiayaAdmin = paramSetting?.find(
     (item) => item.param_name === "param_default_biaya_admin",
   )?.param_value;
+  const [policyFee, setPolicyFee] = useState<string>("");
+  const [adminFee, setAdminFee] = useState<string>("");
+  useEffect(() => {
+    setPolicyFee(defaultBiayaPolis ?? "");
+  }, [defaultBiayaPolis]);
+  useEffect(() => {
+    setAdminFee(defaultBiayaAdmin ?? "");
+  }, [defaultBiayaAdmin]);
 
   const [provisiDic, setProvisiDic] = useState<string>("provisi");
 
@@ -242,6 +416,53 @@ export default function Page() {
   useEffect(() => {
     setOtherFeeValue(otherFee?.min_value?.toString() ?? "0");
   }, [otherFee]);
+
+  const resetLifeInsurance = () => {
+    setLifeInsuranceId("");
+    setLifeInsurancePrepaidOnloan(DEFAULT_PREDEFINE.lifeInsurancePrepaidOnloan);
+    setJumlahTertanggung("");
+  };
+  const resetPaket = () => {
+    setPaketId("");
+    setDp("");
+    setRate("");
+    setProvisi("");
+    setDic("");
+    resetLifeInsurance();
+  };
+  const resetVehicleInsurance = () => {
+    setVehicleInsuranceId("");
+    setPaPassenger("");
+  };
+  const handleDealerChange = (value: string) => {
+    setDealerId(value);
+    setVehicleBrandId(DEFAULT_PREDEFINE.vehicleBrandId);
+    setVehicleModelId("");
+    setVehicleTypeId("");
+    resetPaket();
+    resetVehicleInsurance();
+  };
+  const handleVehicleBrandChange = (value: string) => {
+    setVehicleBrandId(value);
+    setVehicleModelId("");
+    setVehicleTypeId("");
+    resetPaket();
+    resetVehicleInsurance();
+  };
+  const handleVehicleModelChange = (value: string) => {
+    setVehicleModelId(value);
+    setVehicleTypeId("");
+    resetPaket();
+    resetVehicleInsurance();
+  };
+  const handlePaketChange = (value: string) => {
+    setPaketId(value);
+    setDp("");
+    setRate("");
+    setProvisi("");
+    setDic("");
+    resetLifeInsurance();
+  };
 
   type ActionState = {
     error: string | null;
@@ -259,83 +480,9 @@ export default function Page() {
     prevState: ActionState,
     formData: FormData,
   ): Promise<ActionState> => {
-    const branchName = formData.get("branch_name") as string;
-    const dealerId = formData.get("dealerId") as string;
-    const vehicleBrandId = formData.get("vehicleBrandId") as string;
-    const vehicleModelId = formData.get("vehicleModelId") as string;
-    const vehicleTypeId = formData.get("vehicleTypeId") as string;
-    const paketId = formData.get("paketId") as string;
-    const otr = formData.get("otr") as string;
-    const dp = formData.get("dp") as string;
-    const tipeAngsuran = formData.get("tipe_angsuran") as string;
-    const tenor = formData.get("tenor") as string;
-    const tipePembiayaan = formData.get("tipe_pembiayaan") as string;
-    const jenisPenggunaan = formData.get("jenis_penggunaan") as string;
-    const areaAsuransiKendaraanName = formData.get(
-      "area_asuransi_kendaraan_name",
-    ) as string;
-    const asuransiKendaraan = formData.get("asuransi_kendaraan") as string;
-    const jenisAsuransi = formData.get("jenis_asuransi") as string;
-    const prepaidOnloan = formData.get("prepaid_onloan") as string;
-    const tipeDepresiasi = formData.get("tipe_depresiasi") as string;
-    const isBundleRfe = formData.get("is_bundlerfe") as string;
-    const isTs = formData.get("is_ts") as string;
-    const isPadriver = formData.get("is_padriver") as string;
-    const isPai = formData.get("is_pai") as string;
-    const paPassenger = formData.get("pa_passenger") as string;
-    const tjh = formData.get("tjh") as string;
-    const paCoverage = formData.get("pa_coverage") as string;
-    const lifeInsuranceId = formData.get("life_insurance_id") as string;
-    const lifeInsurancePrepaidOnloan = formData.get(
-      "life_insurance_prepaid_onloan",
-    ) as string;
-    const isAffinity = formData.get("is_affinity") as string;
-    const isGht = formData.get("is_ght") as string;
-    const jumlahTertanggung = formData.get("jumlah_tertanggung") as string;
-    const rate = formData.get("rate") as string;
-    const provisi = formData.get("provisi") as string;
-    const dic = formData.get("dic") as string;
-    const policyFee = formData.get("policy_fee") as string;
-    const adminFee = formData.get("admin_fee") as string;
-    const otherFee = formData.get("other_fee") as string;
+    const values = parseSimulationForm(formData);
 
-    console.log(
-      branchName,
-      dealerId,
-      vehicleBrandId,
-      vehicleModelId,
-      vehicleTypeId,
-      paketId,
-      otr,
-      dp,
-      tipeAngsuran,
-      tenor,
-      tipePembiayaan,
-      jenisPenggunaan,
-      areaAsuransiKendaraanName,
-      asuransiKendaraan,
-      jenisAsuransi,
-      prepaidOnloan,
-      tipeDepresiasi,
-      isBundleRfe,
-      isTs,
-      isPadriver,
-      isPai,
-      paPassenger,
-      tjh,
-      paCoverage,
-      lifeInsuranceId,
-      lifeInsurancePrepaidOnloan,
-      isAffinity,
-      isGht,
-      jumlahTertanggung,
-      rate,
-      provisi,
-      dic,
-      policyFee,
-      adminFee,
-      otherFee,
-    );
+    console.log(values);
     return prevState;
   };
   const [_state, formAction, isCalculating] = useActionState(
@@ -429,7 +576,7 @@ export default function Page() {
               placeholder="Select Paket"
               loading={isLoadingPaket}
               disabled={!branchId || !dealerId || !vehicleModelId}
-              onChange={setPaketId}
+              onChange={handlePaketChange}
               options={paket?.map((item) => ({
                 id: item.id,
                 label: item.name,
@@ -492,12 +639,7 @@ export default function Page() {
               placeholder="Select Tipe Angsuran"
               loading={isLoadingParamSetting}
               onChange={setTipeAngsuran}
-              options={paramSetting
-                ?.filter((item) => item.param_name === "tipe_angsuran")
-                .map((item) => ({
-                  id: item.param_value,
-                  label: item.param_value,
-                }))}
+              options={paramOptions.tipeAngsuran}
             />
 
             <SimulationSelect
@@ -507,13 +649,7 @@ export default function Page() {
               placeholder="Select Tenor"
               loading={isLoadingParamSetting}
               onChange={setTenor}
-              options={paramSetting
-                ?.filter((item) => item.param_name === "tenor")
-                ?.sort((a, b) => Number(a.param_value) - Number(b.param_value))
-                .map((item) => ({
-                  id: item.param_value,
-                  label: `${item.param_value} Bulan`,
-                }))}
+              options={paramOptions.tenor}
             />
 
             <SimulationSelect
@@ -523,12 +659,7 @@ export default function Page() {
               placeholder="Select Tipe Pembiayaan"
               loading={isLoadingParamSetting}
               onChange={setTipePembiayaan}
-              options={paramSetting
-                ?.filter((item) => item.param_name === "tipe_pembiayaan")
-                .map((item) => ({
-                  id: item.param_value,
-                  label: item.param_value,
-                }))}
+              options={paramOptions.tipePembiayaan}
             />
 
             <SimulationSelect
@@ -538,12 +669,7 @@ export default function Page() {
               placeholder="Select Jenis Penggunaan"
               loading={isLoadingParamSetting}
               onChange={setJenisPenggunaan}
-              options={paramSetting
-                ?.filter((item) => item.param_name === "jenis_penggunaan")
-                .map((item) => ({
-                  id: item.param_value,
-                  label: item.param_value,
-                }))}
+              options={paramOptions.jenisPenggunaan}
             />
 
             <div className="divider">
@@ -581,12 +707,7 @@ export default function Page() {
               placeholder="Select Jenis Asuransi"
               loading={isLoadingParamSetting}
               onChange={setJenisAsuransi}
-              options={paramSetting
-                ?.filter((item) => item.param_name === "jenis_asuransi")
-                .map((item) => ({
-                  id: item.param_value,
-                  label: item.param_value,
-                }))}
+              options={paramOptions.jenisAsuransi}
             />
 
             <SimulationSelect
@@ -596,12 +717,7 @@ export default function Page() {
               placeholder="Select Prepaid / Onloan"
               loading={isLoadingParamSetting}
               onChange={setPrepaidOnloan}
-              options={paramSetting
-                ?.filter((item) => item.param_name === "prepaid_onloan")
-                .map((item) => ({
-                  id: item.param_value,
-                  label: item.param_value,
-                }))}
+              options={paramOptions.prepaidOnloan}
             />
 
             <SimulationSelect
@@ -611,12 +727,7 @@ export default function Page() {
               placeholder="Select Tipe Depresiasi"
               loading={isLoadingParamSetting}
               onChange={setTipeDepresiasi}
-              options={paramSetting
-                ?.filter((item) => item.param_name === "tipe_depresiasi")
-                .map((item) => ({
-                  id: item.param_value,
-                  label: item.param_value,
-                }))}
+              options={paramOptions.tipeDepresiasi}
             />
 
             <details className="collapse collapse-arrow bg-base-100 border border-base-300">
@@ -683,15 +794,7 @@ export default function Page() {
                   loading={isLoadingParamSetting}
                   disabled={!vehicleInsuranceId}
                   onChange={setPaPassenger}
-                  options={paramSetting
-                    ?.filter((item) => item.param_name === "param_pa_passenger")
-                    ?.sort(
-                      (a, b) => Number(a.param_value) - Number(b.param_value),
-                    )
-                    .map((item) => ({
-                      id: item.param_value,
-                      label: `${item.param_value} pax`,
-                    }))}
+                  options={paramOptions.paPassenger}
                 />
 
                 <SimulationSelect
@@ -702,15 +805,7 @@ export default function Page() {
                   loading={isLoadingParamSetting}
                   disabled={!vehicleInsuranceId}
                   onChange={setTjh}
-                  options={paramSetting
-                    ?.filter((item) => item.param_name === "param_tjh")
-                    ?.sort(
-                      (a, b) => Number(a.param_value) - Number(b.param_value),
-                    )
-                    .map((item) => ({
-                      id: item.param_value,
-                      label: item.param_value,
-                    }))}
+                  options={paramOptions.tjh}
                 />
 
                 <SimulationSelect
@@ -721,15 +816,7 @@ export default function Page() {
                   loading={isLoadingParamSetting}
                   disabled={!vehicleInsuranceId}
                   onChange={setPaCoverage}
-                  options={paramSetting
-                    ?.filter((item) => item.param_name === "param_pa_coverage")
-                    ?.sort(
-                      (a, b) => Number(a.param_value) - Number(b.param_value),
-                    )
-                    .map((item) => ({
-                      id: item.param_value,
-                      label: item.param_value,
-                    }))}
+                  options={paramOptions.paCoverage}
                 />
               </div>
             </details>
@@ -761,15 +848,7 @@ export default function Page() {
               loading={isLoadingParamSetting}
               disabled={!lifeInsuranceId}
               onChange={setLifeInsurancePrepaidOnloan}
-              options={paramSetting
-                ?.filter(
-                  (item) =>
-                    item.param_name === "param_life_insurance_prepaid_onloan",
-                )
-                .map((item) => ({
-                  id: item.param_value,
-                  label: item.param_value,
-                }))}
+              options={paramOptions.lifeInsurancePrepaidOnloan}
             />
 
             <details className="collapse collapse-arrow bg-base-100 border border-base-300">
@@ -812,15 +891,7 @@ export default function Page() {
                   loading={isLoadingParamSetting}
                   disabled={!lifeInsuranceId}
                   onChange={setJumlahTertanggung}
-                  options={paramSetting
-                    ?.filter((item) => item.param_name === "param_pa_passenger")
-                    ?.sort(
-                      (a, b) => Number(a.param_value) - Number(b.param_value),
-                    )
-                    .map((item) => ({
-                      id: item.param_value,
-                      label: `${item.param_value} pax`,
-                    }))}
+                  options={paramOptions.paPassenger}
                 />
               </div>
             </details>
@@ -862,16 +933,7 @@ export default function Page() {
               loading={isLoadingParamSetting}
               disabled={!paketId}
               onChange={setProvisiDic}
-              options={[
-                {
-                  id: "provisi",
-                  label: "Provisi",
-                },
-                {
-                  id: "dic",
-                  label: "DIC",
-                },
-              ]}
+              options={PROVISI_DIC_OPTIONS}
             />
 
             {provisiDic === "provisi" && (
@@ -941,7 +1003,7 @@ export default function Page() {
                   className="input grow validator appearance-none"
                   required
                   inputMode="decimal"
-                  defaultValue={defaultBiayaPolis}
+                  value={policyFee}
                   readOnly
                 />
               </label>
@@ -958,7 +1020,8 @@ export default function Page() {
                   required
                   min={defaultBiayaAdmin}
                   inputMode="decimal"
-                  defaultValue={defaultBiayaAdmin}
+                  value={adminFee}
+                  onChange={(e) => setAdminFee(e.target.value)}
                 />
               </label>
               {!isLoadingParamSetting && (

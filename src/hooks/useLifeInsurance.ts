@@ -4,10 +4,13 @@ import {
   getLifeInsuranceByPaket,
 } from "@/lib/actions/client/life-insurance";
 import { queryKeys } from "@/lib/query/keys";
-import type { LifeInsurancePaket } from "@/lib/types/life-insurance";
+import type {
+  LifeInsurance,
+  LifeInsurancePaket,
+} from "@/lib/types/life-insurance";
 
 export function useLifeInsurance(paketId: string) {
-  return useQuery({
+  return useQuery<LifeInsurance[]>({
     queryKey: queryKeys.lifeInsurance(paketId),
     queryFn: () => getLifeInsurance(paketId),
     enabled: !!paketId,
