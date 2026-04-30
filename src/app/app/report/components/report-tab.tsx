@@ -14,53 +14,59 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { Database } from "@/lib/types/database.types";
 
-type DataType = {
-  id: string | null;
-  paket_name: string | null;
-  area: string | null;
-  branch: string | null;
-  customer_name: string | null;
-  model_kendaraan: string | null;
-  jenis_kendaraan: string | null;
-  merk_kendaraan: string | null;
-  tenor?: number | null;
-  dealer?: string | null;
-  tipe_perhitungan: string | null;
-  tipe_pembiayaan?: string | null;
-  jenis_penggunaan?: string | null;
-  paket_confins_name?: string | null;
-  // asuransi kendaraan
-  asuransi_kendaraan?: string | null;
-  tipe_asuransi_kendaraan?: string | null;
-  asuransi_kendaraan_prepaid_onloan?: string | null;
-  is_rfe?: boolean | null;
-  is_ts?: boolean | null;
-  is_padriver?: boolean | null;
-  is_pai?: boolean | null;
-  pa_passenger?: number | null;
-  tjh_amount?: number | null;
-  coverage_pa?: number | null;
-  tipe_depresiasi?: string | null;
-  // asuransi jiwa
-  asuransi_jiwa?: string | null;
-  asuransi_jiwa_prepaid_onloan?: string | null;
-  asuransi_jiwa_tertanggung?: string | null;
-  nilai_affinity?: number | null;
-  nilai_ght?: number | null;
-  // calculation
-  otr: number | null;
-  percent_dp: number | null;
-  dp: number | null;
-  tipe_angsuran?: string | null;
-  percent_selling_rate?: number | null;
-  percent_min_selling_rate?: number | null;
-  percent_base_rate?: number | null;
-  percent_selling_rate_efektif?: number | null;
-  percent_selling_rate_final?: number | null;
-  percent_effective_selling_rate_final?: number | null;
-  gross_yield?: number | null;
-};
+// type DataType = {
+//   id: string | null;
+//   paket_name: string | null;
+//   area: string | null;
+//   branch: string | null;
+//   customer_name: string | null;
+//   model_kendaraan: string | null;
+//   jenis_kendaraan: string | null;
+//   merk_kendaraan: string | null;
+//   tenor?: number | null;
+//   dealer?: string | null;
+//   tipe_perhitungan: string | null;
+//   tipe_pembiayaan?: string | null;
+//   jenis_penggunaan?: string | null;
+//   paket_confins_name?: string | null;
+//   // asuransi kendaraan
+//   asuransi_kendaraan?: string | null;
+//   tipe_asuransi_kendaraan?: string | null;
+//   asuransi_kendaraan_prepaid_onloan?: string | null;
+//   is_rfe?: boolean | null;
+//   is_ts?: boolean | null;
+//   is_padriver?: boolean | null;
+//   is_pai?: boolean | null;
+//   pa_passenger?: number | null;
+//   tjh_amount?: number | null;
+//   coverage_pa?: number | null;
+//   tipe_depresiasi?: string | null;
+//   // asuransi jiwa
+//   asuransi_jiwa?: string | null;
+//   asuransi_jiwa_prepaid_onloan?: string | null;
+//   asuransi_jiwa_tertanggung?: number | null;
+//   nilai_affinity?: number | null;
+//   nilai_ght?: number | null;
+//   // calculation
+//   otr: number | null;
+//   percent_dp: number | null;
+//   dp: number | null;
+//   tipe_angsuran?: string | null;
+//   percent_selling_rate?: number | null;
+//   percent_min_selling_rate?: number | null;
+//   percent_base_rate?: number | null;
+//   percent_selling_rate_efektif?: number | null;
+//   percent_selling_rate_final?: number | null;
+//   percent_effective_selling_rate_final?: number | null;
+//   gross_yield?: number | null;
+// };
+
+type DataType = Partial<
+  Database["public"]["Tables"]["simulasi_budget"]["Row"]
+> &
+  Partial<Database["public"]["Tables"]["simulasi_kredit"]["Row"]>;
 
 type TabKey = "budget" | "credit";
 
